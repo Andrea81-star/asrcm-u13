@@ -1,0 +1,36 @@
+rules_version = '2';
+
+// ═══════════════════════════════════════════════════════════════════
+// ASRCM U13 — Regole Firestore
+// MODALITÀ TEST: lettura/scrittura aperte fino alla data indicata.
+// L'app gestisce le password internamente (admin/visiteur), NON tramite
+// Firebase Auth: finché non attivi Firebase Authentication, le regole
+// devono restare aperte. Aggiorna la data prima della scadenza.
+// ═══════════════════════════════════════════════════════════════════
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /asrcm/{docId} {
+      allow read, write: if request.time < timestamp.date(2026, 12, 31);
+    }
+
+    // Tutto il resto è vietato
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+// ── VERSIONE BLINDATA (da usare dopo aver attivato Firebase Auth
+//    con accesso anonimo o email/password) ──────────────────────────
+//
+// service cloud.firestore {
+//   match /databases/{database}/documents {
+//     match /asrcm/{docId} {
+//       allow read:  if request.auth != null;
+//       allow write: if request.auth != null;
+//     }
+//     match /{document=**} { allow read, write: if false; }
+//   }
+// }

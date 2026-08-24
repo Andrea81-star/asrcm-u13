@@ -93,7 +93,36 @@
     }, 400);
   };
 
+  /* ── Autenticazione anonima ────────────────────────────────────────
+     Le regole Firestore richiedono una sessione autenticata. L'app apre
+     da sola una sessione anonima: l'utente non se ne accorge.
+     Se in Console non e stato abilitato il metodo "Anonyme", proseguo
+     comunque: con regole aperte l'app continua a funzionare.          */
+  function connect() {
+    if (connected) return;
+    connected = true;
+    startListening();
+  }
+  var connected = false;
+
+  if (firebase.auth) {
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) { console.log('[sync] sessione anonima attiva'); connect(); }
+    });
+    firebase.auth().signInAnonymously().catch(function (e) {
+      console.warn('[sync] autenticazione anonima non riuscita:', e.code || e);
+      if (e && e.code === 'auth/operation-not-allowed') {
+        console.warn('[sync] abilita "Anonyme" in Firebase Console → Authentication → Sign-in method');
+      }
+      connect();   // tentativo comunque, utile con regole aperte
+    });
+  } else {
+    console.warn('[sync] SDK Auth non caricato: connessione diretta a Firestore');
+    connect();
+  }
+
   /* ── Ascolto in tempo reale ────────────────────────────────────── */
+  function startListening() {
   DOC.onSnapshot(function (snap) {
     if (snap.exists) {
       seeded = true;
@@ -110,7 +139,12 @@
   }, function (err) {
     status('#CC1020', 'hors ligne');
     console.error('[sync] onSnapshot:', err);
+    if (err && err.code === 'permission-denied') {
+      console.error('[sync] Regole Firestore: accesso rifiutato. '
+        + 'Verifica di aver abilitato "Anonyme" in Authentication e pubblicato firestore.rules.');
+    }
   });
+  }
 
   /* ── Diagnostica da console ────────────────────────────────────── */
   window.fbDebug = {

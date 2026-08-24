@@ -2,8 +2,18 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ASRCM U13 — Football</title>
+
+<!-- ═══ PWA : app installabile ═══ -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#C4102E">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ASRCM U13">
+<meta name="mobile-web-app-capable" content="yes">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,9 +21,23 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
 :root{--R:#CC1020;--Y:#F5C518;--RD:#A50D1A;--YD:#D4A800;--G:#2E7D32;--LO:#E65100;--LR:#C62828;--scoreboard:'Bebas Neue',Impact,'Arial Narrow',sans-serif}
-html,body{background:#ccc;min-height:100vh}
+html,body{background:#ccc;min-height:100vh;-webkit-text-size-adjust:100%}
 body{display:flex;justify-content:center;padding:20px 10px}
 .app{max-width:400px;width:100%;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;min-height:760px;box-shadow:0 12px 48px rgba(0,0,0,.2);position:relative}
+/* Su telefono e in modalita app installata: occupa tutto lo schermo,
+   rispettando le zone sicure di iPhone (notch e barra inferiore). */
+@media (max-width:640px){
+  body{padding:0;background:#fff}
+  /* Almeno 16px: sotto questa soglia iOS ingrandisce da solo al focus. */
+  .fg input,.fg select,.fg textarea{font-size:16px}
+  .app{max-width:none;border-radius:0;box-shadow:none;min-height:100vh;min-height:100dvh;
+       padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);
+       padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+}
+@media (display-mode:standalone){
+  body{padding:0;background:#fff}
+  .app{max-width:none;border-radius:0;box-shadow:none;min-height:100vh;min-height:100dvh}
+}
 .scr{display:none;flex-direction:column;flex:1}
 .scr.on{display:flex}
 
@@ -126,6 +150,57 @@ body{display:flex;justify-content:center;padding:20px 10px}
   z-index:0;
 }
 .hero-top{display:flex;align-items:center;padding:10px 13px 0;gap:8px}
+/* ─── Chips di filtro e ricerca ─── */
+.chips{display:flex;gap:7px;margin-bottom:10px;flex-wrap:wrap}
+.chip{padding:6px 14px;border-radius:999px;border:1px solid #ddd;background:#fff;color:#666;
+      font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;-webkit-tap-highlight-color:transparent}
+.chip.on{background:var(--R);border-color:var(--R);color:#fff}
+.msearch{width:100%;padding:9px 12px;border:1px solid #e0e0e0;border-radius:8px;font-size:13px;
+         background:#fff;color:#111;outline:none;margin-bottom:12px;font-family:inherit}
+.msearch:focus{border-color:var(--R)}
+
+/* ─── Card prossimo match ─── */
+.nextcard{background:linear-gradient(135deg,var(--R),#8E0B21);border-radius:14px;padding:15px;
+          margin-bottom:14px;color:#fff;cursor:pointer}
+.nextcard .nc-lbl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+                  color:rgba(255,255,255,.75);margin-bottom:7px}
+.nextcard .nc-vs{font-size:17px;font-weight:700;line-height:1.25;margin-bottom:8px}
+.nextcard .nc-meta{font-size:12px;color:rgba(255,255,255,.9);line-height:1.6}
+.nextcard .nc-meta i{font-size:13px;vertical-align:-2px;margin-right:5px;width:15px;display:inline-block}
+.nc-count{display:inline-block;margin-top:10px;background:var(--Y);color:#111;font-size:12px;
+          font-weight:700;padding:4px 12px;border-radius:999px}
+
+/* ─── Avviso incoerenza marcatori ─── */
+.warnbox{background:#FFF8E1;border:1px solid #F9A825;border-radius:9px;padding:10px 12px;
+         margin-bottom:12px;font-size:12px;color:#8a6100;line-height:1.5}
+.warnbox b{color:#6d4c00}
+
+/* ─── Serie recente ─── */
+.formrow{display:flex;gap:4px}
+.formdot{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;
+         font-size:11px;font-weight:700;color:#fff}
+
+/* ─── Elenco unico composizione + marcatori ─── */
+.pickzone{background:#f9f9f7;border-radius:10px;border:1px solid #e5e5e5;margin-bottom:12px;overflow:hidden}
+.pk-head{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#fff;border-bottom:1px solid #e5e5e5;font-size:10px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.07em}
+.pk-grp{font-size:10px;color:#999;font-weight:700;padding:9px 12px 5px;text-transform:uppercase;letter-spacing:.06em}
+.pk-row{display:flex;align-items:center;gap:9px;padding:7px 12px;border-bottom:1px solid #f0f0f0}
+.pk-row:last-child{border-bottom:none}
+.pk-pick{display:flex;align-items:center;gap:9px;flex:1;min-width:0;cursor:pointer}
+.pk-pick input{width:18px;height:18px;accent-color:var(--R);cursor:pointer;flex:0 0 auto}
+.pk-name{font-size:13px;color:#111;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pk-goals{display:flex;align-items:center;gap:6px;flex:0 0 auto}
+.pk-btn{width:28px;height:28px;border-radius:50%;border:1px solid #ddd;background:#fff;color:#555;font-size:17px;font-weight:700;line-height:1;cursor:pointer;font-family:inherit;padding:0;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
+.pk-btn:active{background:#eee}
+.pk-btn.plus{border-color:var(--R);color:var(--R)}
+.pk-btn.plus.maxed{opacity:.3;border-color:#ddd;color:#bbb}
+.pk-n{min-width:20px;text-align:center;font-size:14px;font-weight:700;color:#ccc}
+.pk-n.on{color:var(--R)}
+/* La categoria puo restringersi, i pulsanti azione mai. */
+#d-catl{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#d-del-btn,#d-edit-btn{flex:0 0 auto;white-space:nowrap}
+#d-del-btn{padding:0;width:32px;height:32px;justify-content:center;border-radius:50%}
+#d-edit-btn{height:32px;padding:0 13px}
 .hero-score-area{text-align:center;padding:6px 13px 32px}
 .hero-teams{font-family:var(--scoreboard);letter-spacing:.03em;font-size:19px;color:rgba(255,255,255,.92);margin-bottom:2px;line-height:1.15}
 .hero-num{font-family:var(--scoreboard);letter-spacing:.02em;font-size:52px;color:#fff;line-height:1}
@@ -223,6 +298,7 @@ body{display:flex;justify-content:center;padding:20px 10px}
   <!-- HOME -->
   <div id="tab-home" style="flex:1;overflow-y:auto;padding:12px 13px 16px;display:block">
     <div id="admin-banner" class="warn-banner" style="display:none"><i class="ti ti-shield-check" style="font-size:16px;color:#F9A825"></i>Mode administrateur — accès complet</div>
+    <div id="next-match"></div>
     <div class="sec">Catégories</div>
     <div class="catcard" onclick="openCat('amicaux')"><div class="caticon" style="background:#FEE8EA">🤝</div><div style="flex:1"><div style="font-size:14px;font-weight:600;color:#111">Amicaux</div><div style="font-size:12px;color:#999">Matchs de préparation</div></div><span class="cnt" id="c-amicaux">0</span></div>
     <div class="catcard" onclick="openCat('championnat')"><div class="caticon" style="background:#FEF8E1">🏆</div><div style="flex:1"><div style="font-size:14px;font-weight:600;color:#111">Championnat</div><div style="font-size:12px;color:#999">District Côte d'Azur</div></div><span class="cnt" id="c-championnat">0</span></div>
@@ -267,6 +343,12 @@ body{display:flex;justify-content:center;padding:20px 10px}
     <div id="adm-add-home" style="display:none">
       <button class="btn3" onclick="openAddMatch(null)"><i class="ti ti-plus" style="font-size:18px"></i>Ajouter un match</button>
     </div>
+    <div class="chips">
+      <button class="chip on" id="mf-all" onclick="setMatchFilter('all')">Tous</button>
+      <button class="chip" id="mf-played" onclick="setMatchFilter('played')">Joués</button>
+      <button class="chip" id="mf-upcoming" onclick="setMatchFilter('upcoming')">À venir</button>
+    </div>
+    <input type="text" class="msearch" id="m-search" placeholder="Rechercher un adversaire..." oninput="renderAllMatches()">
     <div id="all-mlist"></div>
   </div>
 
@@ -303,6 +385,19 @@ body{display:flex;justify-content:center;padding:20px 10px}
       <div class="sec">Notifications récentes</div>
       <div class="form-card" id="notif-list-admin"></div>
       <button class="btn2" onclick="sendManualNotif()"><i class="ti ti-send" style="font-size:14px;vertical-align:-2px"></i>Envoyer une notification</button>
+      <div class="sec">Sauvegarde des données</div>
+      <div class="form-card">
+        <p style="font-size:12px;color:#888;line-height:1.55;margin-bottom:11px">
+          Exporte l'ensemble des deux équipes (effectifs, matchs, notifications)
+          dans un fichier à conserver. L'import remplace toutes les données actuelles.
+        </p>
+        <button class="btn1" onclick="exportBackup()"><i class="ti ti-download"></i>Exporter la sauvegarde</button>
+        <button class="btn2" onclick="document.getElementById('backup-file').click()" style="margin-top:8px">
+          <i class="ti ti-upload" style="font-size:14px;vertical-align:-2px"></i>Importer une sauvegarde
+        </button>
+        <input type="file" id="backup-file" accept="application/json,.json" style="display:none" onchange="importBackup(this)">
+        <div id="backup-info" style="font-size:11px;color:#999;margin-top:9px;line-height:1.5"></div>
+      </div>
       <div class="sec">Paramètres</div>
       <div class="form-card">
         <div class="srow"><span style="color:#999">Équipe</span><span style="font-weight:600">ASRCM U13</span></div>
@@ -354,8 +449,8 @@ body{display:flex;justify-content:center;padding:20px 10px}
         <button class="hdr-back" onclick="backFromDetail()"><i class="ti ti-arrow-left" style="font-size:18px"></i>Retour</button>
         <span class="team-chip on-dark" style="margin-left:8px"><i class="ti ti-shield"></i><span class="team-chip-label">U13-1</span></span>
         <span id="d-catl" style="font-size:12px;color:rgba(255,255,255,.7);flex:1;margin-left:8px"></span>
-        <button id="d-del-btn" style="display:none;align-items:center;gap:4px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);color:#fff;cursor:pointer;padding:6px 11px;border-radius:999px;font-size:12px;font-weight:700;font-family:inherit" onclick="askDeleteMatch()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>Supprimer</button>
-        <button id="d-edit-btn" style="display:none;background:var(--Y);border:none;border-radius:8px;color:#111;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;display:none;align-items:center;gap:4px" onclick="openAddMatch('edit')"><i class="ti ti-edit" style="font-size:14px;vertical-align:-2px"></i>Modifier</button>
+        <button id="d-del-btn" aria-label="Supprimer le match" title="Supprimer le match" style="display:none;align-items:center;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);color:#fff;cursor:pointer;border-radius:50%;font-family:inherit" onclick="askDeleteMatch()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg></button>
+        <button id="d-edit-btn" style="display:none;background:var(--Y);border:none;border-radius:999px;color:#111;font-size:12px;font-weight:700;cursor:pointer;align-items:center;gap:5px" onclick="openAddMatch('edit')"><i class="ti ti-edit" style="font-size:14px;vertical-align:-2px"></i>Modifier</button>
       </div>
       <div class="hero-score-area">
         <div id="d-teams" class="hero-teams"></div>
@@ -379,6 +474,9 @@ body{display:flex;justify-content:center;padding:20px 10px}
           <button onclick="deleteMatch()" style="background:#C62828;color:#fff">Supprimer</button>
         </div>
       </div>
+    </div>
+    <div style="padding:13px 13px 0">
+      <div id="d-info" style="font-size:12px;color:#888;line-height:1.7"></div>
     </div>
     <div style="padding:13px 13px 8px">
       <div class="sec" style="margin-top:0">Composition</div>
@@ -423,23 +521,17 @@ body{display:flex;justify-content:center;padding:20px 10px}
       <div class="fg"><label>Équipe domicile</label><input type="text" id="f-home" value="ASRCM U13"></div>
       <div class="fg"><label>Équipe visiteur</label><input type="text" id="f-away" placeholder="Adversaire"></div>
     </div>
+    <div class="fg"><label>Lieu</label><input type="text" id="f-lieu" placeholder="Stade, terrain..."></div>
     <div class="frow">
       <div class="fg"><label>Buts dom.</label><input type="number" id="f-gh" min="0" placeholder="— (pas encore joué)"></div>
       <div class="fg"><label>Buts vis.</label><input type="number" id="f-ga" min="0" placeholder="—"></div>
     </div>
-    <div class="sec">Composition par poste</div>
-    <div style="background:#f9f9f7;border-radius:10px;padding:12px;border:1px solid #e5e5e5;margin-bottom:12px">
-      <div style="font-size:10px;color:#999;font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">Gardien</div>
-      <div id="pick-gk"></div>
-      <div style="font-size:10px;color:#999;font-weight:600;margin:10px 0 8px;text-transform:uppercase;letter-spacing:.06em">Défenseurs</div>
-      <div id="pick-def"></div>
-      <div style="font-size:10px;color:#999;font-weight:600;margin:10px 0 8px;text-transform:uppercase;letter-spacing:.06em">Milieux</div>
-      <div id="pick-mid"></div>
-      <div style="font-size:10px;color:#999;font-weight:600;margin:10px 0 8px;text-transform:uppercase;letter-spacing:.06em">Attaquants</div>
-      <div id="pick-att"></div>
+    <div class="sec">Composition &amp; buteurs</div>
+    <div id="goal-warn" class="warnbox" style="display:none"></div>
+    <div class="pickzone">
+      <div class="pk-head"><span>Composition</span><span id="pk-tot">Buteurs</span></div>
+      <div id="pick-all"></div>
     </div>
-    <div class="sec">Buteurs ASRCM</div>
-    <div id="scorer-picks" style="background:#f9f9f7;border-radius:10px;padding:10px;border:1px solid #e5e5e5;margin-bottom:12px"></div>
     <div class="sec">Notes entraîneur (admin uniquement)</div>
     <div class="fg"><label><i class="ti ti-message" style="font-size:13px;vertical-align:-2px"></i> Commentaires</label><textarea id="f-com" placeholder="Impression générale..."></textarea></div>
     <div class="fg"><label><i class="ti ti-alert-triangle" style="font-size:13px;vertical-align:-2px;color:#E65100"></i> Points à améliorer</label><textarea id="f-err" placeholder="Erreurs à corriger..."></textarea></div>
@@ -495,6 +587,8 @@ body{display:flex;justify-content:center;padding:20px 10px}
       <div class="form-card">
         <div class="srow"><span style="color:#999">Buts marqués</span><span id="pe-goals" style="font-weight:700;color:var(--R)">0</span></div>
         <div class="srow"><span style="color:#999">Matchs joués</span><span id="pe-matches" style="font-weight:600">0</span></div>
+        <div class="srow"><span style="color:#999">Moyenne buts/match</span><span id="pe-avg" style="font-weight:600">0.00</span></div>
+        <div class="srow" style="align-items:center"><span style="color:#999">Série récente</span><span id="pe-form" class="formrow"></span></div>
       </div>
     </div>
   </div>
@@ -764,7 +858,7 @@ function initMain(){
   document.getElementById('viewer-msg').style.display=a?'none':'flex';
   document.getElementById('admin-panel').style.display=a?'block':'none';
   if(calViewYear===null){var t=new Date();calViewYear=t.getFullYear();calViewMonth=t.getMonth();}
-  updateCounts();renderStats();renderTopScorers();renderAllMatches();renderCalendar();renderPlayersList();renderNotifsAdmin();
+  updateCounts();renderStats();renderTopScorers();renderNextMatch();renderAllMatches();renderCalendar();renderPlayersList();renderNotifsAdmin();
 }
 
 /* ═══ CATEGORIES ═══ */
@@ -774,11 +868,23 @@ function openCat(cat){
   document.getElementById('cat-s').textContent=catMeta[cat].s;
   var ab=document.getElementById('cat-add-btn');
   ab.style.display=role==='admin'?'flex':'none';
-  var filtered=matches.filter(m=>m.cat===cat);
+  var filtered=sortMatches(matches.filter(m=>m.cat===cat));
   document.getElementById('cat-list').innerHTML=filtered.length
     ?filtered.map(m=>matchCard(m,'cat')).join('')
     :'<div style="text-align:center;color:#bbb;font-size:13px;padding:40px 0"><i class="ti ti-ball-football" style="font-size:40px;display:block;margin-bottom:12px"></i>Aucun match'+(role==='admin'?'<br><span style="font-size:12px">Ajoutez votre premier match</span>':'')+'</div>';
   goScreen('S-cat');
+}
+
+/* ═══ ORDINAMENTO ═══ */
+// À venir per primi (dal più vicino), poi i giocati dal più recente.
+function sortMatches(list){
+  return list.slice().sort(function(a,b){
+    var pa=isPlayed(a), pb=isPlayed(b);
+    if(pa!==pb) return pa?1:-1;
+    var da=(a.date||'')+'T'+(a.time||'00:00');
+    var db=(b.date||'')+'T'+(b.time||'00:00');
+    return pa ? (db<da?-1:db>da?1:0) : (da<db?-1:da>db?1:0);
+  });
 }
 
 /* ═══ MATCH CARDS ═══ */
@@ -803,7 +909,7 @@ function matchCard(m,origin){
 function quickDeleteMatch(id){
   if(!confirm('Supprimer définitivement ce match ?')) return;
   matches=matches.filter(m=>m.id!==id);
-  updateCounts();renderStats();renderTopScorers();renderAllMatches();renderCalendar();
+  updateCounts();renderStats();renderTopScorers();renderNextMatch();renderAllMatches();renderCalendar();
   if(document.getElementById('S-cat').classList.contains('on')) openCat(curCat);
   persist();
   toast('Match supprimé ✓');
@@ -823,6 +929,10 @@ function openDetail(id){
   var played=isPlayed(m);
   document.getElementById('d-catl').textContent=catMeta[m.cat].t+' · '+fmtDate(m.date)+(m.time?' · '+m.time:'');
   document.getElementById('d-teams').textContent=m.home+' vs '+m.away;
+  var info='<i class="ti ti-calendar" style="font-size:13px;vertical-align:-2px;margin-right:5px"></i>'
+          +fmtDate(m.date)+(m.time?' à '+m.time:'');
+  if(m.lieu) info+='<br><i class="ti ti-map-pin" style="font-size:13px;vertical-align:-2px;margin-right:5px"></i>'+m.lieu;
+  document.getElementById('d-info').innerHTML=info;
   var scoreEl=document.getElementById('d-score');
   var gdeEl=document.getElementById('d-gd-h');
   if(played){
@@ -874,7 +984,7 @@ function askDeleteMatch(){deletingId=editId;document.getElementById('del-confirm
 function cancelDeleteMatch(){document.getElementById('del-confirm-wrap').style.display='none';}
 function deleteMatch(){
   matches=matches.filter(m=>m.id!==deletingId);
-  updateCounts();renderStats();renderTopScorers();renderAllMatches();renderCalendar();
+  updateCounts();renderStats();renderTopScorers();renderNextMatch();renderAllMatches();renderCalendar();
   persist();
   toast('Match supprimé ✓');
   backFromDetail();
@@ -893,24 +1003,155 @@ function openAddMatch(mode){
   document.getElementById('f-away').value=m?m.away:'';
   document.getElementById('f-gh').value=(m&&m.gh!==null&&m.gh!==undefined)?m.gh:'';
   document.getElementById('f-ga').value=(m&&m.ga!==null&&m.ga!==undefined)?m.ga:'';
+  document.getElementById('f-lieu').value=m&&m.lieu?m.lieu:'';
   document.getElementById('f-com').value=m?m.com:'';
   document.getElementById('f-err').value=m?m.err:'';
   document.getElementById('f-pos').value=m?m.pos2:'';
-  renderPickerZone('scorer-picks','all',m?m.scorerIds:[]);
-  renderPickerZone('pick-gk','gk',m?m.gkIds:[]);
-  renderPickerZone('pick-def','def',m?m.defIds:[]);
-  renderPickerZone('pick-mid','mid',m?m.midIds:[]);
-  renderPickerZone('pick-att','att',m?m.attIds:[]);
+  goalMap = {};
+  (m ? (m.scorerIds || []) : []).forEach(function (id) { goalMap[id] = (goalMap[id] || 0) + 1; });
+  selectedIds = new Set([].concat(
+    m ? (m.gkIds || []) : [], m ? (m.defIds || []) : [],
+    m ? (m.midIds || []) : [], m ? (m.attIds || []) : []
+  ));
+  renderPickAll();
+  checkGoalCoherence();
+  ['f-gh','f-ga','f-home'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.oninput=checkGoalCoherence;
+  });
   goScreen('S-add');
 }
-function renderPickerZone(zoneId,pos,selectedIds){
-  var zone=document.getElementById(zoneId);
-  var pool=pos==='all'?players:players.filter(p=>p.pos===pos);
-  if(!pool.length){zone.innerHTML='<span style="font-size:12px;color:#bbb">Aucun joueur dans ce poste</span>';return;}
-  var sel=new Set(selectedIds||[]);
-  zone.innerHTML=pool.map(p=>'<label style="display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid #f0f0f0;cursor:pointer"><input type="checkbox" data-pid="'+p.id+'" '+(sel.has(p.id)?'checked':'')+' style="width:18px;height:18px;accent-color:var(--R);cursor:pointer"><span style="font-size:13px;color:#111">'+p.name+(p.cap?' ⭐':'')+'</span><span style="font-size:11px;color:#aaa;margin-left:auto">#'+p.num+'</span></label>').join('');
+
+/* ═══ ELENCO UNICO : composizione a sinistra, marcatori a destra ═══ */
+var goalMap = {};        // { idGiocatore : numeroGol }
+var selectedIds = new Set();
+
+function renderPickAll(){
+  var zone = document.getElementById('pick-all');
+  if(!zone) return;
+  if(!players.length){
+    zone.innerHTML = '<div class="pk-grp">Aucun joueur dans l\'effectif</div>';
+    return;
+  }
+  var html = '';
+  POS_ORDER.forEach(function(pos){
+    var pool = players.filter(function(p){ return p.pos === pos; });
+    if(!pool.length) return;
+    html += '<div class="pk-grp">' + POS_LABEL[pos] + '</div>';
+    pool.forEach(function(p){
+      var g = goalMap[p.id] || 0;
+      html += '<div class="pk-row">'
+            +   '<label class="pk-pick">'
+            +     '<input type="checkbox" data-pid="' + p.id + '" data-pos="' + pos + '"'
+            +       (selectedIds.has(p.id) ? ' checked' : '')
+            +       ' onchange="togglePick(' + p.id + ',this.checked)">'
+            +     '<span class="pk-name">' + p.name + (p.cap ? ' \u2B50' : '') + '</span>'
+            +   '</label>'
+            +   '<span class="pk-goals">'
+            +     '<button type="button" class="pk-btn" onclick="stepGoal(' + p.id + ',-1)" aria-label="Retirer un but">\u2212</button>'
+            +     '<span class="pk-n' + (g ? ' on' : '') + '" id="pkn-' + p.id + '">' + g + '</span>'
+            +     '<button type="button" class="pk-btn plus" onclick="stepGoal(' + p.id + ',1)" aria-label="Ajouter un but">+</button>'
+            +   '</span>'
+            + '</div>';
+    });
+  });
+  zone.innerHTML = html;
+  if(typeof checkGoalCoherence === 'function') checkGoalCoherence();
 }
-function getPickedIds(zoneId){var ids=[];document.querySelectorAll('#'+zoneId+' input[type=checkbox]:checked').forEach(cb=>{ids.push(parseInt(cb.dataset.pid));});return ids;}
+
+function togglePick(pid, on){
+  if(on){ selectedIds.add(pid); return; }
+  selectedIds.delete(pid);
+  // Chi non e in composizione non puo essere marcatore.
+  if(goalMap[pid]){ goalMap[pid] = 0; refreshGoalCell(pid); }
+  checkGoalCoherence();
+}
+
+function stepGoal(pid, delta){
+  // Non si possono attribuire piu gol di quanti ne indichi il punteggio.
+  if(delta > 0){
+    var exp = asrcmGoalsFromScore();
+    if(exp !== null && !isNaN(exp) && totalGoalsAssigned() >= exp){
+      toast(exp === 0
+        ? "Le score n'indique aucun but pour l'ASRCM"
+        : 'Score : ' + exp + ' but' + (exp>1?'s':'') + ' — tous déjà attribués');
+      return;
+    }
+  }
+  var g = (goalMap[pid] || 0) + delta;
+  if(g < 0) g = 0;
+  goalMap[pid] = g;
+  // Segnare un gol implica essere in campo: seleziono in automatico.
+  if(g > 0 && !selectedIds.has(pid)){
+    selectedIds.add(pid);
+    var cb = document.querySelector('#pick-all input[data-pid="' + pid + '"]');
+    if(cb) cb.checked = true;
+  }
+  refreshGoalCell(pid);
+  checkGoalCoherence();
+}
+
+function refreshGoalCell(pid){
+  var el = document.getElementById('pkn-' + pid);
+  if(!el) return;
+  var g = goalMap[pid] || 0;
+  el.textContent = g;
+  el.className = 'pk-n' + (g ? ' on' : '');
+}
+
+// Restituisce gli id selezionati per un ruolo, o tutti se pos vale 'all'.
+function getPickedIds(pos){
+  var ids = [];
+  document.querySelectorAll('#pick-all input[type=checkbox]:checked').forEach(function(cb){
+    if(pos === 'all' || cb.dataset.pos === pos) ids.push(parseInt(cb.dataset.pid));
+  });
+  return ids;
+}
+
+// Un id ripetuto n volte equivale a n gol: mantiene compatibile countGoals().
+function buildScorerIds(){
+  var out = [];
+  Object.keys(goalMap).forEach(function(k){
+    var n = goalMap[k] || 0, id = parseInt(k);
+    for(var i = 0; i < n; i++) out.push(id);
+  });
+  return out;
+}
+/* ═══ COERENZA BUTEURS / SCORE ═══ */
+// Quanti gol ha segnato l'ASRCM secondo il punteggio inserito.
+function asrcmGoalsFromScore(){
+  var home=(document.getElementById('f-home').value||'').toUpperCase();
+  var ghRaw=document.getElementById('f-gh').value, gaRaw=document.getElementById('f-ga').value;
+  if(ghRaw===''||gaRaw==='') return null;      // partita non ancora giocata
+  return home.indexOf('ASRCM')>=0 ? parseInt(ghRaw) : parseInt(gaRaw);
+}
+function totalGoalsAssigned(){
+  var t=0; Object.keys(goalMap).forEach(function(k){ t+=goalMap[k]||0; }); return t;
+}
+// Aggiorna il contatore e mostra l'avviso se i due numeri non coincidono.
+function checkGoalCoherence(){
+  var tot=totalGoalsAssigned(), expected=asrcmGoalsFromScore();
+  var head=document.getElementById('pk-tot');
+  if(head) head.textContent='Buteurs'+(tot?' ('+tot+')':'');
+  // Spegne i "+" quando tutti i gol del punteggio sono stati attribuiti.
+  var full = expected !== null && !isNaN(expected) && tot >= expected;
+  document.querySelectorAll('#pick-all .pk-btn.plus').forEach(function(b){
+    b.classList.toggle('maxed', full);
+  });
+  var box=document.getElementById('goal-warn');
+  if(!box) return true;
+  if(expected===null||isNaN(expected)||tot===expected){ box.style.display='none'; return true; }
+  var diff=expected-tot;
+  box.innerHTML= diff>0
+    ? '\u26A0\uFE0F Le score indique <b>'+expected+' but'+(expected>1?'s':'')+'</b> pour l\'ASRCM, mais '
+      +(tot===0?'aucun buteur n\'est':'seulement <b>'+tot+'</b> sont')+' renseigné'+(tot>1?'s':'')+'. '
+      +'Il manque <b>'+diff+' but'+(diff>1?'s':'')+'</b>.'
+    : '\u26A0\uFE0F Vous avez attribué <b>'+tot+' but'+(tot>1?'s':'')+'</b> alors que le score n\'en indique que '
+      +'<b>'+expected+'</b>. Corrigez le score ou les buteurs.';
+  box.style.display='block';
+  return false;
+}
+
 function saveMatch(){
   var away=document.getElementById('f-away').value.trim();
   if(!away){document.getElementById('form-err').textContent="Indiquez le nom de l'équipe adverse.";document.getElementById('form-err').style.display='block';return;}
@@ -919,7 +1160,11 @@ function saveMatch(){
   var ghRaw=document.getElementById('f-gh').value, gaRaw=document.getElementById('f-ga').value;
   var gh=ghRaw===''?null:parseInt(ghRaw);
   var ga=gaRaw===''?null:parseInt(gaRaw);
-  var nm={id:editId!==null?editId:Date.now(),cat,home:document.getElementById('f-home').value||'ASRCM U13',away,gh,ga,date:document.getElementById('f-date').value,time:document.getElementById('f-time').value,scorerIds:getPickedIds('scorer-picks'),gkIds:getPickedIds('pick-gk'),defIds:getPickedIds('pick-def'),midIds:getPickedIds('pick-mid'),attIds:getPickedIds('pick-att'),com:document.getElementById('f-com').value,err:document.getElementById('f-err').value,pos2:document.getElementById('f-pos').value};
+  var nm={id:editId!==null?editId:Date.now(),cat,home:document.getElementById('f-home').value||'ASRCM U13',away,gh,ga,date:document.getElementById('f-date').value,time:document.getElementById('f-time').value,lieu:document.getElementById('f-lieu').value.trim(),scorerIds:buildScorerIds(),gkIds:getPickedIds('gk'),defIds:getPickedIds('def'),midIds:getPickedIds('mid'),attIds:getPickedIds('att'),com:document.getElementById('f-com').value,err:document.getElementById('f-err').value,pos2:document.getElementById('f-pos').value};
+  if(!checkGoalCoherence()){
+    var tot=totalGoalsAssigned(), exp=asrcmGoalsFromScore();
+    if(!confirm('Les buteurs ne correspondent pas au score ('+tot+' but(s) attribué(s) pour '+exp+' au score).\n\nEnregistrer quand même ?')) return;
+  }
   if(editId!==null){var idx=matches.findIndex(x=>x.id===editId);matches[idx]=nm;}
   else matches.push(nm);
   if(document.getElementById('f-notif').checked){
@@ -927,7 +1172,7 @@ function saveMatch(){
     notifs.unshift({txt:notifTxt,time:'À l\'instant'});
     document.getElementById('ndot').style.display='block';
   }
-  updateCounts();renderStats();renderTopScorers();renderAllMatches();renderCalendar();renderNotifsAdmin();
+  updateCounts();renderStats();renderTopScorers();renderNextMatch();renderAllMatches();renderCalendar();renderNotifsAdmin();
   curCat=cat;
   persist();
   toast(editId!==null?'Match mis à jour ✓':'Match enregistré ✓');
@@ -944,6 +1189,25 @@ function backFromAdd(){
 var POS_ORDER=['gk','def','mid','att'];
 var POS_LABEL={gk:'Gardiens',def:'Défenseurs',mid:'Milieux',att:'Attaquants'};
 function countGoals(pid){var c=0;matches.forEach(m=>{(m.scorerIds||[]).forEach(id=>{if(id==pid)c++;});});return c;}
+// Ultimi 5 match giocati dal giocatore: V (victoire), N (nul), D (défaite).
+function recentFormHtml(pid){
+  var COL={V:'#2E7D32',N:'#F9A825',D:'#C62828'};
+  var res=matches.filter(function(m){
+      return isPlayed(m) && [].concat(m.gkIds||[],m.defIds||[],m.midIds||[],m.attIds||[]).indexOf(pid)>=0;
+    })
+    .sort(function(a,b){ return (b.date||'')<(a.date||'')?-1:1; })
+    .slice(0,5)
+    .map(function(m){
+      var ih=m.home.indexOf('ASRCM')>=0, mf=ih?m.gh:m.ga, ma=ih?m.ga:m.gh;
+      return mf>ma?'V':mf<ma?'D':'N';
+    });
+  if(!res.length) return '<span style="font-size:12px;color:#bbb">Aucun match joué</span>';
+  res.reverse();   // dal più vecchio al più recente, come nelle classifiche
+  return res.map(function(r){
+    return '<span class="formdot" style="background:'+COL[r]+'">'+r+'</span>';
+  }).join('');
+}
+
 function countMatchesPlayed(pid){return matches.filter(m=>[...(m.gkIds||[]),...(m.defIds||[]),...(m.midIds||[]),...(m.attIds||[])].includes(pid)).length;}
 
 function renderPlayersList(){
@@ -967,6 +1231,19 @@ function renderPlayersList(){
   document.getElementById('player-list-tab').innerHTML=html||'<p style="color:#bbb;font-size:13px;text-align:center;padding:30px 0">Aucun joueur enregistré</p>';
 }
 
+/* ═══ NUMERI DI MAGLIA ═══ */
+// Restituisce il giocatore che porta già questo numero, escluso exceptId.
+function numTaken(num,exceptId){
+  if(!num) return null;   // 0 o vuoto: nessun controllo
+  return players.find(function(p){ return p.num===num && p.id!==exceptId; }) || null;
+}
+// Primo numero libero da 1 in su, per suggerirlo all'utente.
+function firstFreeNum(){
+  var used={}; players.forEach(function(p){ used[p.num]=1; });
+  for(var i=1;i<100;i++){ if(!used[i]) return i; }
+  return 0;
+}
+
 /* ═══ PLAYER EDIT SCREEN ═══ */
 function openPlayerEdit(id){
   editingPlayerId=id;
@@ -981,7 +1258,10 @@ function openPlayerEdit(id){
   var cs=document.getElementById('pe-cap-star');
   cs.style.display=p.cap?'flex':'none';
   document.getElementById('pe-goals').textContent=countGoals(id);
-  document.getElementById('pe-matches').textContent=countMatchesPlayed(id);
+  var mp=countMatchesPlayed(id), gl=countGoals(id);
+  document.getElementById('pe-matches').textContent=mp;
+  document.getElementById('pe-avg').textContent=mp?(gl/mp).toFixed(2):'0.00';
+  document.getElementById('pe-form').innerHTML=recentFormHtml(id);
   document.getElementById('pe-del-confirm').style.display='none';
   // update cap star live
   document.getElementById('pe-cap').onchange=function(){
@@ -998,20 +1278,50 @@ function savePlayerEdit(){
   var isCap=document.getElementById('pe-cap').checked;
   // si nouveau capitaine → retirer capitaine agli altri
   if(isCap&&!wasCap) players.forEach(pl=>{if(pl.id!==editingPlayerId)pl.cap=false;});
+  var num=parseInt(document.getElementById('pe-num').value)||0;
+  var clash=numTaken(num,editingPlayerId);
+  if(clash){
+    toast('Le numéro '+num+' est déjà porté par '+clash.name);
+    return;
+  }
   p.name=name; p.pos=document.getElementById('pe-pos').value;
-  p.num=parseInt(document.getElementById('pe-num').value)||0; p.cap=isCap;
+  p.num=num; p.cap=isCap;
   renderPlayersList(); renderTopScorers();
   persist();
   toast('Joueur mis à jour ✓');
   goScreen('S-main'); showTab('players');
 }
 
-function showDeletePlayerConfirm(){document.getElementById('pe-del-confirm').style.display='block';}
+// In quanti match compare questo giocatore (composizione o buteurs).
+function playerRefCount(pid){
+  return matches.filter(function(m){
+    return [].concat(m.gkIds||[],m.defIds||[],m.midIds||[],m.attIds||[],m.scorerIds||[]).indexOf(pid)>=0;
+  }).length;
+}
+// Rimuove ogni traccia del giocatore dai match, per non lasciare id orfani.
+function purgePlayerRefs(pid){
+  matches.forEach(function(m){
+    ['gkIds','defIds','midIds','attIds','scorerIds'].forEach(function(k){
+      if(m[k]) m[k]=m[k].filter(function(id){return id!==pid;});
+    });
+  });
+}
+function showDeletePlayerConfirm(){
+  var n=playerRefCount(editingPlayerId);
+  var box=document.getElementById('pe-del-confirm');
+  box.querySelector('p').innerHTML = n
+    ? 'Supprimer définitivement ce joueur ?<br><b>\u26A0\uFE0F Il figure dans '+n+' match'+(n>1?'s':'')
+      +'</b> : ses buts et sa présence en seront retirés.'
+    : 'Supprimer définitivement ce joueur ?';
+  box.style.display='block';
+}
 function deletePlayerConfirmed(){
+  var n=playerRefCount(editingPlayerId);
+  purgePlayerRefs(editingPlayerId);
   players=players.filter(p=>p.id!==editingPlayerId);
-  renderPlayersList();renderTopScorers();
+  renderPlayersList();renderStats();renderTopScorers();renderNextMatch();renderAllMatches();renderCalendar();
   persist();
-  toast('Joueur supprimé ✓');
+  toast(n?('Joueur supprimé — '+n+' match'+(n>1?'s':'')+' mis à jour ✓'):'Joueur supprimé ✓');
   goScreen('S-main');showTab('players');
 }
 
@@ -1019,11 +1329,16 @@ function deletePlayerConfirmed(){
 function quickDeletePlayer(id){
   var p=players.find(x=>x.id===id);
   if(!p) return;
-  if(!confirm('Supprimer '+p.name+' ? Il sera retiré de l\'effectif.')) return;
+  var n=playerRefCount(id);
+  var msg='Supprimer '+p.name+' ?';
+  if(n) msg+='\n\n\u26A0\uFE0F Ce joueur figure dans '+n+' match'+(n>1?'s':'')
+           +'. Ses buts et sa présence seront retirés de ces matchs.';
+  if(!confirm(msg)) return;
+  purgePlayerRefs(id);
   players=players.filter(x=>x.id!==id);
-  renderPlayersList();renderTopScorers();
+  renderPlayersList();renderStats();renderTopScorers();renderNextMatch();renderAllMatches();renderCalendar();
   persist();
-  toast('Joueur supprimé ✓');
+  toast(n?('Joueur supprimé — '+n+' match'+(n>1?'s':'')+' mis à jour ✓'):'Joueur supprimé ✓');
 }
 
 /* ═══ ADD PLAYER ═══ */
@@ -1031,7 +1346,13 @@ function toggleAddPlayerForm(){var f=document.getElementById('add-player-form');
 function addPlayer(){
   var n=document.getElementById('pn').value.trim();
   if(!n){toast('Entrez le nom du joueur');return;}
-  players.push({id:Date.now(),name:n,pos:document.getElementById('pp').value,num:parseInt(document.getElementById('pnum').value)||0,cap:false});
+  var num=parseInt(document.getElementById('pnum').value)||0;
+  var clash=numTaken(num,null);
+  if(clash){
+    toast('Le numéro '+num+' est déjà porté par '+clash.name+' — libre : '+firstFreeNum());
+    return;
+  }
+  players.push({id:Date.now(),name:n,pos:document.getElementById('pp').value,num:num,cap:false});
   document.getElementById('pn').value='';document.getElementById('pnum').value='';
   document.getElementById('add-player-form').style.display='none';
   renderPlayersList();persist();toast('Joueur ajouté ✓');
@@ -1054,6 +1375,33 @@ function renderStats(){
   el.textContent=(gd>0?'+':'')+gd;
   el.style.color=gd>0?'#2E7D32':gd<0?'#C62828':'#111';
 }
+/* ═══ PROCHAIN MATCH ═══ */
+function renderNextMatch(){
+  var box=document.getElementById('next-match');
+  if(!box) return;
+  var today=new Date(); today.setHours(0,0,0,0);
+  var up=matches.filter(function(m){
+    if(isPlayed(m)||!m.date) return false;
+    var d=new Date(m.date+'T'+(m.time||'23:59'));
+    return d>=today;
+  }).sort(function(a,b){
+    return (a.date+(a.time||''))<(b.date+(b.time||''))?-1:1;
+  });
+  if(!up.length){ box.innerHTML=''; return; }
+  var m=up[0];
+  var d=new Date(m.date+'T'+(m.time||'15:00'));
+  var days=Math.ceil((d-today)/86400000);
+  var count = days<=0 ? "Aujourd'hui" : days===1 ? 'Demain' : 'Dans '+days+' jours';
+  box.innerHTML='<div class="nextcard" onclick="openDetailFrom(\'tab\','+m.id+')">'
+    +'<div class="nc-lbl">Prochain match</div>'
+    +'<div class="nc-vs">'+m.home+' <span style="opacity:.6">vs</span> '+m.away+'</div>'
+    +'<div class="nc-meta"><i class="ti ti-calendar"></i>'+fmtDate(m.date)+(m.time?' à '+m.time:'')+'</div>'
+    +(m.lieu?'<div class="nc-meta"><i class="ti ti-map-pin"></i>'+m.lieu+'</div>':'')
+    +'<div class="nc-meta"><i class="ti ti-trophy"></i>'+catMeta[m.cat].t+'</div>'
+    +'<span class="nc-count">'+count+'</span>'
+    +'</div>';
+}
+
 function renderTopScorers(){
   var c={};matches.forEach(m=>{(m.scorerIds||[]).forEach(id=>{c[id]=(c[id]||0)+1;});});
   var sorted=Object.entries(c).sort((a,b)=>b[1]-a[1]).slice(0,5);
@@ -1062,10 +1410,35 @@ function renderTopScorers(){
     ?sorted.map((s,i)=>{var p=players.find(x=>x.id==s[0]);if(!p)return'';return'<div style="margin-bottom:'+(i<sorted.length-1?'10px':'0')+'"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px"><span style="color:#111;font-weight:'+(i===0?'600':'400')+'">'+p.name+'</span><span style="color:#999">'+s[1]+' but'+(s[1]>1?'s':'')+'</span></div><div style="height:5px;background:#eee;border-radius:999px"><div style="height:5px;border-radius:999px;background:var(--R);width:'+Math.round(s[1]/max*100)+'%"></div></div></div>';}).join('')
     :'<span style="font-size:13px;color:#bbb">Aucun but enregistré</span>';
 }
+var matchFilter='all';
+function setMatchFilter(f){
+  matchFilter=f;
+  ['all','played','upcoming'].forEach(function(k){
+    document.getElementById('mf-'+k).classList.toggle('on',k===f);
+  });
+  renderAllMatches();
+}
 function renderAllMatches(){
+  var q=(document.getElementById('m-search')||{}).value||'';
+  q=q.trim().toLowerCase();
+  var pool=matches.filter(function(m){
+    if(matchFilter==='played' && !isPlayed(m)) return false;
+    if(matchFilter==='upcoming' && isPlayed(m)) return false;
+    if(q && (m.home+' '+m.away).toLowerCase().indexOf(q)<0) return false;
+    return true;
+  });
   var html='';
-  ['amicaux','championnat','coupe','tournois'].forEach(c=>{var ms=matches.filter(m=>m.cat===c);if(ms.length){html+='<div class="sec">'+catMeta[c].t+'</div>';html+=ms.map(m=>matchCard(m,'tab')).join('');}});
-  document.getElementById('all-mlist').innerHTML=html||'<p style="color:#bbb;font-size:13px;text-align:center;padding:30px 0">Aucun match enregistré</p>';
+  ['amicaux','championnat','coupe','tournois'].forEach(function(c){
+    var ms=sortMatches(pool.filter(function(m){return m.cat===c;}));
+    if(ms.length){
+      html+='<div class="sec">'+catMeta[c].t+' <span style="color:#bbb;font-weight:400">('+ms.length+')</span></div>';
+      html+=ms.map(function(m){return matchCard(m,'tab');}).join('');
+    }
+  });
+  var empty = q||matchFilter!=='all'
+    ? 'Aucun match ne correspond à cette recherche'
+    : 'Aucun match enregistré';
+  document.getElementById('all-mlist').innerHTML=html||'<p style="color:#bbb;font-size:13px;text-align:center;padding:30px 0">'+empty+'</p>';
 }
 
 /* ═══ CALENDRIER ═══ */
@@ -1131,6 +1504,118 @@ function sendManualNotif(){
   document.getElementById('ndot').style.display='block';
   renderNotifsAdmin();persist();toast('Notification envoyée ✓');
 }
+/* ═══════════════════════════════════════════════════════════════
+   SAUVEGARDE : export et import de toutes les données
+   Le fichier contient les deux équipes. Les mots de passe ne sont
+   PAS exportés : ils resteraient lisibles en clair dans le fichier.
+   ═══════════════════════════════════════════════════════════════ */
+var BACKUP_VERSION = 1;
+
+function buildBackup(){
+  persist();                       // fissa lo stato della squadra corrente
+  var teams = {};
+  Object.keys(TEAMS).forEach(function(k){
+    teams[k] = {
+      label:   TEAMS[k].label,
+      players: TEAMS[k].players,
+      matches: TEAMS[k].matches,
+      notifs:  TEAMS[k].notifs
+    };
+  });
+  return {
+    app: 'ASRCM-U13',
+    version: BACKUP_VERSION,
+    exportedAt: new Date().toISOString(),
+    teams: teams
+  };
+}
+
+function exportBackup(){
+  try{
+    var data = buildBackup();
+    var blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+    var url  = URL.createObjectURL(blob);
+    var d    = new Date();
+    var pad  = function(n){ return n<10?'0'+n:''+n; };
+    var a    = document.createElement('a');
+    a.href = url;
+    a.download = 'asrcm-u13-sauvegarde-' + d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate()) + '.json';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+
+    var np = 0, nm = 0;
+    Object.keys(data.teams).forEach(function(k){
+      np += (data.teams[k].players||[]).length;
+      nm += (data.teams[k].matches||[]).length;
+    });
+    document.getElementById('backup-info').textContent =
+      'Dernier export : ' + np + ' joueurs, ' + nm + ' matchs.';
+    toast('Sauvegarde exportée ✓');
+  }catch(e){
+    console.error('[backup] export:', e);
+    toast('Export impossible sur cet appareil');
+  }
+}
+
+// Verifica che il file sia una sauvegarde valida prima di toccare i dati.
+function validateBackup(o){
+  if(!o || typeof o !== 'object')            return 'Fichier illisible';
+  if(o.app !== 'ASRCM-U13')                  return "Ce fichier n'est pas une sauvegarde ASRCM U13";
+  if(!o.teams || typeof o.teams !== 'object') return 'Aucune équipe dans le fichier';
+  var keys = Object.keys(o.teams);
+  if(!keys.length)                           return 'Aucune équipe dans le fichier';
+  for(var i=0;i<keys.length;i++){
+    var t = o.teams[keys[i]];
+    if(!Array.isArray(t.players) || !Array.isArray(t.matches))
+      return 'Données incomplètes pour ' + keys[i];
+  }
+  return null;
+}
+
+function importBackup(input){
+  var file = input.files && input.files[0];
+  input.value = '';                 // permette di re-importare lo stesso file
+  if(!file) return;
+
+  var reader = new FileReader();
+  reader.onerror = function(){ toast('Lecture du fichier impossible'); };
+  reader.onload = function(){
+    var data;
+    try { data = JSON.parse(reader.result); }
+    catch(e){ toast('Fichier JSON invalide'); return; }
+
+    var err = validateBackup(data);
+    if(err){ toast(err); return; }
+
+    var np = 0, nm = 0;
+    Object.keys(data.teams).forEach(function(k){
+      np += (data.teams[k].players||[]).length;
+      nm += (data.teams[k].matches||[]).length;
+    });
+    var when = data.exportedAt ? new Date(data.exportedAt).toLocaleDateString('fr-FR') : 'date inconnue';
+
+    if(!confirm('Restaurer la sauvegarde du ' + when + ' ?\n\n'
+      + np + ' joueurs et ' + nm + ' matchs vont REMPLACER toutes les données actuelles '
+      + 'des deux équipes, sur tous les appareils.\n\nCette action est irréversible.')) return;
+
+    Object.keys(TEAMS).forEach(function(k){
+      var t = data.teams[k];
+      if(!t) return;
+      TEAMS[k].players = t.players || [];
+      TEAMS[k].matches = t.matches || [];
+      TEAMS[k].notifs  = t.notifs  || [];
+    });
+
+    bindTeamData(); updateTeamUI();
+    persist();                      // scrive in locale e su Firestore
+    initMain();
+    document.getElementById('backup-info').textContent =
+      'Sauvegarde du ' + when + ' restaurée : ' + np + ' joueurs, ' + nm + ' matchs.';
+    toast('Sauvegarde restaurée ✓');
+  };
+  reader.readAsText(file);
+}
+
 function changeVPwd(){var v=document.getElementById('new-vpwd').value;if(!v){toast('Entrez un mot de passe');return;}pwds.visitor=v;document.getElementById('new-vpwd').value='';persist();toast('Mot de passe visiteur mis à jour ✓');}
 function changeAPwd(){var v=document.getElementById('new-apwd').value;if(!v){toast('Entrez un mot de passe');return;}pwds.admin=v;document.getElementById('new-apwd').value='';persist();toast('Mot de passe admin mis à jour ✓');}
 
@@ -1142,7 +1627,38 @@ document.getElementById('f-date').valueAsDate=new Date();
 <!-- ═══ FIREBASE FIRESTORE — sincronizzazione in tempo reale ═══ -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script src="firebase-sync.js"></script>
+
+<!-- ═══ Registrazione del service worker (modalità offline) ═══ -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('service-worker.js')
+      .then(function (reg) {
+        console.log('[pwa] service worker attivo');
+        // Se arriva una nuova versione, la attivo e ricarico una sola volta.
+        reg.addEventListener('updatefound', function () {
+          var nw = reg.installing;
+          if (!nw) return;
+          nw.addEventListener('statechange', function () {
+            if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+              nw.postMessage('skipWaiting');
+            }
+          });
+        });
+      })
+      .catch(function (e) { console.warn('[pwa] service worker non registrato:', e); });
+
+    var reloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function () {
+      if (reloaded) return;
+      reloaded = true;
+      location.reload();
+    });
+  });
+}
+</script>
 </body>
 </html>

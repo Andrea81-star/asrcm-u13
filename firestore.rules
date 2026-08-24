@@ -1,36 +1,34 @@
 rules_version = '2';
 
 // ═══════════════════════════════════════════════════════════════════
-// ASRCM U13 — Regole Firestore
-// MODALITÀ TEST: lettura/scrittura aperte fino alla data indicata.
-// L'app gestisce le password internamente (admin/visiteur), NON tramite
-// Firebase Auth: finché non attivi Firebase Authentication, le regole
-// devono restare aperte. Aggiorna la data prima della scadenza.
+// ASRCM U13 — Regole Firestore SENZA SCADENZA
+//
+// Queste regole non contengono alcuna data: non smetteranno mai di
+// funzionare da sole.
+//
+// L'accesso è consentito solo alle sessioni autenticate. L'app apre da
+// sé una sessione anonima all'avvio, quindi per l'utente non cambia
+// nulla: nessun login Firebase, nessuna registrazione.
+//
+// ⚠️ PREREQUISITO OBBLIGATORIO
+// Nella Console Firebase: Build → Authentication → Sign-in method →
+// abilitare "Anonyme". Senza questo passaggio l'app non potrà più
+// leggere né scrivere.
 // ═══════════════════════════════════════════════════════════════════
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
     match /asrcm/{docId} {
-      allow read, write: if request.time < timestamp.date(2026, 12, 31);
+      allow read:  if request.auth != null;
+      // Limite di dimensione: evita che un errore riempia il database.
+      allow write: if request.auth != null
+                   && request.resource.data.size() < 20;
     }
 
-    // Tutto il resto è vietato
+    // Tutto il resto è vietato.
     match /{document=**} {
       allow read, write: if false;
     }
   }
 }
-
-// ── VERSIONE BLINDATA (da usare dopo aver attivato Firebase Auth
-//    con accesso anonimo o email/password) ──────────────────────────
-//
-// service cloud.firestore {
-//   match /databases/{database}/documents {
-//     match /asrcm/{docId} {
-//       allow read:  if request.auth != null;
-//       allow write: if request.auth != null;
-//     }
-//     match /{document=**} { allow read, write: if false; }
-//   }
-// }

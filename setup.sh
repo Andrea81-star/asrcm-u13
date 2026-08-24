@@ -22,8 +22,8 @@ if grep -q "INCOLLA_QUI" firebase-config.js; then
 fi
 
 git init
-git add index.html firebase-config.js firebase-sync.js firestore.rules README.md setup.sh
-git commit -m "ASRCM U13 — app con sincronizzazione Firebase Firestore"
+git add index.html manifest.json service-worker.js firebase-config.js firebase-sync.js firestore.rules setup.sh icons/
+git commit -m "ASRCM U13 — app PWA con Firestore, backup e regole senza scadenza"
 git branch -M main
 git remote remove origin 2>/dev/null || true
 git remote add origin "$REPO_URL"

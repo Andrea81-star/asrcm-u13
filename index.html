@@ -150,6 +150,36 @@ body{display:flex;justify-content:center;padding:20px 10px}
   z-index:0;
 }
 .hero-top{display:flex;align-items:center;padding:10px 13px 0;gap:8px}
+/* ─── Categoria in giallo dentro l'etichetta della partita ─── */
+.mcat{color:var(--Y);font-weight:700}
+
+/* ─── Piazzamento del torneo ─── */
+.rank{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 11px;
+      font-size:11px;font-weight:700;margin-left:6px;vertical-align:1px}
+.rank .ti{font-size:13px}
+.rank.gold{background:#F2B705;color:#3a2c00}
+.rank.silver{background:#D8DCE0;color:#33383d}
+.rank.bronze{background:#CD8C52;color:#3a2410}
+.rank.other{background:rgba(255,255,255,.22);color:#fff}
+
+/* ─── Contenitore torneo ─── */
+.tour{border:1px solid #e5e5e5;border-radius:12px;margin-bottom:11px;overflow:hidden;background:#fff}
+.tour-head{background:linear-gradient(135deg,var(--R),#8E0B21);color:#fff;padding:12px 13px;cursor:pointer}
+.tour-t{display:flex;align-items:center;gap:7px;font-size:15px;font-weight:700;line-height:1.25}
+.tour-t .ti{font-size:17px;color:var(--Y);flex:0 0 auto}
+.tour-m{font-size:11px;color:rgba(255,255,255,.85);margin-top:5px;line-height:1.55}
+.tour-m .mcat{color:var(--Y)}
+.tour-body{padding:9px 10px 4px;background:#fafafa}
+.tour-body .card{margin-bottom:8px}
+.tour-empty{font-size:12px;color:#aaa;text-align:center;padding:14px 0}
+.tour-act{display:flex;gap:7px;padding:0 10px 10px;background:#fafafa}
+.tour-act button{flex:1;border-radius:8px;border:1px solid #ddd;background:#fff;color:#555;
+  font-size:12px;font-weight:600;padding:8px;cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;gap:5px}
+.tour-act button.pri{border-color:var(--R);color:var(--R)}
+.tour-badge{display:inline-block;background:rgba(255,255,255,.2);border-radius:999px;
+  padding:2px 9px;font-size:10px;font-weight:700;margin-left:6px}
+
 /* ─── Chips di filtro e ricerca ─── */
 .chips{display:flex;gap:7px;margin-bottom:10px;flex-wrap:wrap}
 .chip{padding:6px 14px;border-radius:999px;border:1px solid #ddd;background:#fff;color:#666;
@@ -289,6 +319,7 @@ body{display:flex;justify-content:center;padding:20px 10px}
     <button class="tb on" id="tb-home" onclick="showTab('home')"><i class="ti ti-home"></i>Accueil</button>
     <button class="tb" id="tb-calendar" onclick="showTab('calendar')"><i class="ti ti-calendar-event"></i>Calendrier</button>
     <button class="tb" id="tb-matches" onclick="showTab('matches')"><i class="ti ti-ball-football"></i>Matchs</button>
+    <button class="tb" id="tb-tournois" onclick="showTab('tournois')"><i class="ti ti-trophy"></i>Tournois</button>
     <button class="tb" id="tb-players" onclick="showTab('players')"><i class="ti ti-users"></i>Joueurs</button>
     <button class="tb" id="tb-admin" onclick="showTab('admin')">
       <span style="position:relative;display:inline-block"><i class="ti ti-settings"></i><div class="ndot" id="ndot" style="display:none"></div></span>Admin
@@ -303,7 +334,7 @@ body{display:flex;justify-content:center;padding:20px 10px}
     <div class="catcard" onclick="openCat('amicaux')"><div class="caticon" style="background:#FEE8EA">🤝</div><div style="flex:1"><div style="font-size:14px;font-weight:600;color:#111">Amicaux</div><div style="font-size:12px;color:#999">Matchs de préparation</div></div><span class="cnt" id="c-amicaux">0</span></div>
     <div class="catcard" onclick="openCat('championnat')"><div class="caticon" style="background:#FEF8E1">🏆</div><div style="flex:1"><div style="font-size:14px;font-weight:600;color:#111">Championnat</div><div style="font-size:12px;color:#999">District Côte d'Azur</div></div><span class="cnt" id="c-championnat">0</span></div>
     <div class="catcard" onclick="openCat('coupe')"><div class="caticon" style="background:#FDE8F4">🥈</div><div style="flex:1"><div style="font-size:14px;font-weight:600;color:#111">Coupe Riviera</div><div style="font-size:12px;color:#999">Compétition régionale</div></div><span class="cnt" id="c-coupe">0</span></div>
-    <div class="catcard" onclick="openCat('tournois')"><div class="caticon" style="background:#E8FEF0">⭐</div><div style="flex:1"><div style="font-size:14px;font-weight:600;color:#111">Tournois</div><div style="font-size:12px;color:#999">Tournois et coupes</div></div><span class="cnt" id="c-tournois">0</span></div>
+    <div class="catcard" onclick="showTab('tournois')"><div class="caticon" style="background:#E8FEF0">⭐</div><div style="flex:1"><div style="font-size:14px;font-weight:600;color:#111">Tournois</div><div style="font-size:12px;color:#999" id="c-tournois-sub">Tournois et coupes</div></div><span class="cnt" id="c-tournois">0</span></div>
     <div class="sec">Saison 2026–2027</div>
     <div class="statgrid">
       <div class="statbox"><div class="val" id="st-v" style="color:#2E7D32">—</div><div class="lbl">Victoires</div></div>
@@ -344,15 +375,27 @@ body{display:flex;justify-content:center;padding:20px 10px}
       <button class="btn3" onclick="openAddMatch(null)"><i class="ti ti-plus" style="font-size:18px"></i>Ajouter un match</button>
     </div>
     <div class="chips">
-      <button class="chip on" id="mf-all" onclick="setMatchFilter('all')">Tous</button>
-      <button class="chip" id="mf-played" onclick="setMatchFilter('played')">Joués</button>
+      <button class="chip on" id="mf-all" onclick="setMatchFilter('all')">Tous les matchs</button>
       <button class="chip" id="mf-upcoming" onclick="setMatchFilter('upcoming')">À venir</button>
+      <button class="chip" id="mf-played" onclick="setMatchFilter('played')">Joués</button>
+      <button class="chip" id="mf-amicaux" onclick="setMatchFilter('amicaux')">Amicaux</button>
+      <button class="chip" id="mf-championnat" onclick="setMatchFilter('championnat')">Championnat</button>
+      <button class="chip" id="mf-coupe" onclick="setMatchFilter('coupe')">Coupe</button>
     </div>
     <input type="text" class="msearch" id="m-search" placeholder="Rechercher un adversaire..." oninput="renderAllMatches()">
     <div id="all-mlist"></div>
   </div>
 
   <!-- JOUEURS -->
+  <!-- TOURNOIS -->
+  <div id="tab-tournois" style="flex:1;overflow-y:auto;padding:12px 13px 16px;display:none">
+    <div id="tour-new-wrap" style="display:none;margin-bottom:11px">
+      <button class="btn2" onclick="openTourForm(null)"><i class="ti ti-trophy" style="font-size:14px;vertical-align:-2px"></i> Nouveau tournoi</button>
+    </div>
+    <input type="text" class="msearch" id="t-search" placeholder="Rechercher un tournoi..." oninput="renderTournois()">
+    <div id="tour-list"></div>
+  </div>
+
   <div id="tab-players" style="flex:1;overflow-y:auto;padding:12px 13px 16px;display:none">
     <div id="adm-add-player" style="display:none">
       <button class="btn3" onclick="toggleAddPlayerForm()"><i class="ti ti-user-plus" style="font-size:18px"></i>Ajouter un joueur</button>
@@ -501,6 +544,30 @@ body{display:flex;justify-content:center;padding:20px 10px}
 </div>
 
 <!-- ═══════════════ AJOUTER / MODIFIER MATCH ═══════════════ -->
+<div class="scr" id="S-tour">
+  <div class="hero" style="padding:14px 13px">
+    <div class="hero-top">
+      <button class="back" onclick="goScreen('S-main');showTab('tournois')"><i class="ti ti-arrow-left"></i></button>
+      <span id="tour-title" style="font-size:15px;font-weight:700;color:#fff;margin-left:6px">Nouveau tournoi</span>
+    </div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:14px 13px 20px">
+    <div id="tour-err" class="err" style="display:none"></div>
+    <div class="fg"><label>Nom du tournoi</label><input type="text" id="t-name" placeholder="Tournoi de Pentecôte"></div>
+    <div class="fg"><label>Date</label><input type="date" id="t-date"></div>
+    <div class="fg"><label>Lieu</label><input type="text" id="t-lieu" placeholder="Stade, ville..."></div>
+    <div class="frow">
+      <div class="fg"><label>Classement</label><input type="number" id="t-rank" min="1" max="99" placeholder="— (à définir)"></div>
+      <div class="fg"><label>Équipes engagées</label><input type="number" id="t-teams" min="2" max="99" placeholder="Optionnel"></div>
+    </div>
+    <p style="font-size:12px;color:#888;line-height:1.55;margin-bottom:14px">
+      Après avoir créé le tournoi, ajoutez ses matchs depuis la fiche du tournoi.
+      La composition est commune à toutes les rencontres du tournoi.
+    </p>
+    <button class="btn1" onclick="saveTour()"><i class="ti ti-check"></i>Enregistrer</button>
+  </div>
+</div>
+
 <div class="scr" id="S-add">
   <div class="hdr">
     <button class="hdr-back" onclick="backFromAdd()"><i class="ti ti-arrow-left" style="font-size:18px"></i>Retour</button>
@@ -511,7 +578,7 @@ body{display:flex;justify-content:center;padding:20px 10px}
     <div id="form-err" class="err-box" style="display:none"></div>
     <div class="sec">Informations générales</div>
     <div class="fg"><label>Catégorie</label>
-      <select id="f-cat"><option value="amicaux">Amicaux</option><option value="championnat">Championnat</option><option value="coupe">Coupe Riviera</option><option value="tournois">Tournois</option></select>
+      <select id="f-cat"><option value="amicaux">Amicaux</option><option value="championnat">Championnat</option><option value="coupe">Coupe Riviera</option><option value="tournois" id="f-cat-tour" style="display:none">Tournois</option></select>
     </div>
     <div class="frow">
       <div class="fg"><label>Date</label><input type="date" id="f-date"></div>
@@ -522,6 +589,7 @@ body{display:flex;justify-content:center;padding:20px 10px}
       <div class="fg"><label>Équipe visiteur</label><input type="text" id="f-away" placeholder="Adversaire"></div>
     </div>
     <div class="fg"><label>Lieu</label><input type="text" id="f-lieu" placeholder="Stade, terrain..."></div>
+    <div id="tour-note" style="display:none;background:#FFF8E1;border:1px solid #F9A825;border-radius:9px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:#8a6100;line-height:1.5"></div>
     <div class="frow">
       <div class="fg"><label>Buts dom.</label><input type="number" id="f-gh" min="0" placeholder="— (pas encore joué)"></div>
       <div class="fg"><label>Buts vis.</label><input type="number" id="f-ga" min="0" placeholder="—"></div>
@@ -612,7 +680,7 @@ body{display:flex;justify-content:center;padding:20px 10px}
 /* ═══ STATE ═══ */
 var role='', pwds={admin:'asrcmu13',visitor:'visitor123'};
 var curCat='championnat', editId=null, editingPlayerId=null, deletingId=null;
-var listOrigin='tab'; // 'cat', 'tab' ou 'cal' — mémorise d'où l'utilisateur arrive sur le détail d'un match
+var listOrigin='tab'; // 'cat', 'tab', 'tour' ou 'cal' — mémorise d'où l'utilisateur arrive sur le détail d'un match
 var calViewYear=null, calViewMonth=null; // état du calendrier (mois affiché)
 var notifs=[];
 
@@ -705,20 +773,25 @@ var matches_u13_2=[
 ];
 
 /* Registre des deux équipes. U13-1 réutilise les données existantes. */
+var tournaments=[];
+var tournaments_u13_2=[];
+
 var TEAMS={
-  'u13-1':{label:'U13-1', players:players, matches:matches, notifs:[]},
-  'u13-2':{label:'U13-2', players:players_u13_2, matches:matches_u13_2, notifs:[]}
+  'u13-1':{label:'U13-1', players:players, matches:matches, notifs:[], tournaments:tournaments},
+  'u13-2':{label:'U13-2', players:players_u13_2, matches:matches_u13_2, notifs:[], tournaments:tournaments_u13_2}
 };
 var currentTeam='u13-1';
 // Fait pointer players / matches / notifs vers l'équipe active.
-function bindTeamData(){var t=TEAMS[currentTeam];players=t.players;matches=t.matches;notifs=t.notifs;}
+function bindTeamData(){var t=TEAMS[currentTeam];
+  if(!Array.isArray(t.tournaments)) t.tournaments=[];
+  players=t.players;matches=t.matches;notifs=t.notifs;tournaments=t.tournaments;}
 
 /* ═══ PERSISTANCE LOCALE — les données restent après rechargement ═══ */
 var STORAGE_KEY='asrcm_u13_data_v1';
 function saveData(){
   try{
     var out={pwds:pwds, teams:{}};
-    for(var k in TEAMS){ out.teams[k]={players:TEAMS[k].players, matches:TEAMS[k].matches, notifs:TEAMS[k].notifs}; }
+    for(var k in TEAMS){ out.teams[k]={players:TEAMS[k].players, matches:TEAMS[k].matches, notifs:TEAMS[k].notifs, tournaments:TEAMS[k].tournaments||[]}; }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(out));
   }catch(e){ console.warn('Sauvegarde impossible :', e); }
 }
@@ -731,11 +804,12 @@ function loadData(){
       if(Array.isArray(s.players)) TEAMS[k].players=s.players;
       if(Array.isArray(s.matches)) TEAMS[k].matches=s.matches;
       if(Array.isArray(s.notifs))  TEAMS[k].notifs =s.notifs;
+      TEAMS[k].tournaments = Array.isArray(s.tournaments) ? s.tournaments : [];
     } }
   }catch(e){ console.warn('Lecture de la sauvegarde impossible :', e); }
 }
 // Resynchronise l'équipe active dans le registre, puis sauvegarde.
-function persist(){ var t=TEAMS[currentTeam]; t.players=players; t.matches=matches; t.notifs=notifs; saveData(); }
+function persist(){ var t=TEAMS[currentTeam]; t.players=players; t.matches=matches; t.notifs=notifs; t.tournaments=tournaments; saveData(); }
 // Met à jour tous les repères visuels d'équipe (badge + sélecteur).
 function updateTeamUI(){
   var lab=TEAMS[currentTeam].label;
@@ -772,7 +846,7 @@ function posLabel(pos){return{gk:'Gardien',def:'Défenseur',mid:'Milieu',att:'At
 
 /* ═══ NAVIGATION ═══ */
 function goScreen(id){document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');}
-function showTab(t){['home','calendar','matches','players','admin'].forEach(id=>{document.getElementById('tab-'+id).style.display=id===t?'block':'none';var b=document.getElementById('tb-'+id);if(b)b.classList.toggle('on',id===t);});}
+function showTab(t){['home','calendar','matches','tournois','players','admin'].forEach(id=>{document.getElementById('tab-'+id).style.display=id===t?'block':'none';var b=document.getElementById('tb-'+id);if(b)b.classList.toggle('on',id===t);});}
 function backToMain(tab){goScreen('S-main');showTab(tab||'home');}
 
 /* ═══ LOGIN ═══ */
@@ -858,7 +932,7 @@ function initMain(){
   document.getElementById('viewer-msg').style.display=a?'none':'flex';
   document.getElementById('admin-panel').style.display=a?'block':'none';
   if(calViewYear===null){var t=new Date();calViewYear=t.getFullYear();calViewMonth=t.getMonth();}
-  updateCounts();renderStats();renderTopScorers();renderNextMatch();renderAllMatches();renderCalendar();renderPlayersList();renderNotifsAdmin();
+  updateCounts();renderStats();renderTopScorers();renderNextMatch();renderAllMatches();renderTournois();renderCalendar();renderPlayersList();renderNotifsAdmin();
 }
 
 /* ═══ CATEGORIES ═══ */
@@ -868,9 +942,10 @@ function openCat(cat){
   document.getElementById('cat-s').textContent=catMeta[cat].s;
   var ab=document.getElementById('cat-add-btn');
   ab.style.display=role==='admin'?'flex':'none';
-  var filtered=sortMatches(matches.filter(m=>m.cat===cat));
+  var filtered=sortMatches(matches.filter(function(m){return m.cat===cat && !m.tourId;}));
+  var htmlList=filtered.map(function(m){return matchCard(m,'cat');}).join('');
   document.getElementById('cat-list').innerHTML=filtered.length
-    ?filtered.map(m=>matchCard(m,'cat')).join('')
+    ?htmlList
     :'<div style="text-align:center;color:#bbb;font-size:13px;padding:40px 0"><i class="ti ti-ball-football" style="font-size:40px;display:block;margin-bottom:12px"></i>Aucun match'+(role==='admin'?'<br><span style="font-size:12px">Ajoutez votre premier match</span>':'')+'</div>';
   goScreen('S-cat');
 }
@@ -901,15 +976,165 @@ function matchCard(m,origin){
   var delBtn=role==='admin'?'<button class="mini-del" onclick="event.stopPropagation();quickDeleteMatch('+m.id+')" aria-label="Supprimer le match">'+trashSvg+'<span>Suppr.</span></button>':'';
   var scorersRow=played?'<div class="msc"><i class="ti ti-ball-football"></i>'+sn+'</div>':'<div class="msc">Match à venir — composition à confirmer</div>';
   return '<div class="card" data-mid="'+m.id+'" onclick="openDetailFrom(\''+origin+'\','+m.id+')">'
-    +'<div class="mdate"><i class="ti ti-calendar"></i>'+fmtDate(m.date)+(m.time?' · '+m.time:'')+' · '+catMeta[m.cat].t+delBtn+'</div>'
+    +'<div class="mdate"><i class="ti ti-calendar"></i>'+fmtDate(m.date)+(m.time?' · '+m.time:'')+' · <span class="mcat">'+catMeta[m.cat].t+'</span>'+delBtn+'</div>'
     +'<div class="mteams"><span class="tname" style="text-align:left">'+m.home+'</span><span class="sbox '+cls+'">'+scoreLabel+'</span><span class="tname" style="text-align:right">'+m.away+'</span></div>'
     +scorersRow+'</div>';
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TORNEI
+   Un torneo raccoglie piu match. La composizione e comune a tutte le
+   partite del torneo: modificandola in una, si propaga alle altre.
+   ═══════════════════════════════════════════════════════════════ */
+function tourMatches(tid){
+  return sortMatches(matches.filter(function(m){ return m.tourId===tid; }));
+}
+function tourRecord(tid){
+  var v=0,n=0,d=0;
+  tourMatches(tid).forEach(function(m){
+    if(!isPlayed(m)) return;
+    var ih=m.home.indexOf('ASRCM')>=0, mf=ih?m.gh:m.ga, ma=ih?m.ga:m.gh;
+    if(mf>ma)v++; else if(mf<ma)d++; else n++;
+  });
+  return {v:v,n:n,d:d,played:v+n+d};
+}
+
+// Etichetta del piazzamento: medaglia per i primi tre, pastiglia neutra oltre.
+function rankBadge(t){
+  if(!t.rank) return '';
+  var cls = t.rank===1?'gold' : t.rank===2?'silver' : t.rank===3?'bronze' : 'other';
+  var icon = t.rank<=3 ? '<i class="ti ti-medal"></i>' : '';
+  var txt;
+  if(t.rank===1)      txt='Vainqueurs';
+  else if(t.rank===2) txt='2e place';
+  else if(t.rank===3) txt='3e place';
+  else                txt=t.rank+'e';
+  if(t.teams) txt += ' / '+t.teams;
+  return '<span class="rank '+cls+'">'+icon+txt+'</span>';
+}
+
+function tourCard(t,inside){
+  var all=tourMatches(t.id);
+  var list=(inside&&inside.length?sortMatches(inside):all);
+  var r=tourRecord(t.id);
+  var meta=fmtDate(t.date)+' · <span class="mcat">Tournoi</span>'+(t.lieu?' · '+t.lieu:'');
+  var badge=all.length
+    ? '<span class="tour-badge">'+all.length+' match'+(all.length>1?'s':'')+'</span>'
+    : '<span class="tour-badge">Aucun match</span>';
+  var rec=r.played?'<br>'+r.v+'V · '+r.n+'N · '+r.d+'D':'';
+  var body=list.length
+    ? list.map(function(m){ return matchCard(m,'tour'); }).join('')
+    : '<div class="tour-empty">Aucun match dans ce tournoi</div>';
+  var acts=role==='admin'
+    ? '<div class="tour-act">'
+      +'<button class="pri" onclick="event.stopPropagation();addMatchToTour('+t.id+')"><i class="ti ti-plus"></i>Ajouter un match</button>'
+      +'<button onclick="event.stopPropagation();openTourForm('+t.id+')"><i class="ti ti-pencil"></i>Modifier</button>'
+      +'<button onclick="event.stopPropagation();deleteTour('+t.id+')"><i class="ti ti-trash"></i></button>'
+      +'</div>'
+    : '';
+  return '<div class="tour">'
+    +'<div class="tour-head" onclick="toggleTour('+t.id+')">'
+    +  '<div class="tour-t"><i class="ti ti-trophy"></i><span>'+t.name+'</span>'+rankBadge(t)+badge+'</div>'
+    +  '<div class="tour-m">'+meta+rec+'</div>'
+    +'</div>'
+    +'<div class="tour-body" id="tb-'+t.id+'">'+body+'</div>'
+    + acts
+    +'</div>';
+}
+
+function toggleTour(tid){
+  var b=document.getElementById('tb-'+tid);
+  if(b) b.style.display = b.style.display==='none' ? 'block' : 'none';
+}
+
+/* ── Form torneo ── */
+var editingTourId=null;
+function openTourForm(tid){
+  editingTourId=tid;
+  var t=tid?tournaments.find(function(x){return x.id===tid;}):null;
+  document.getElementById('tour-title').textContent=t?'Modifier le tournoi':'Nouveau tournoi';
+  document.getElementById('t-name').value=t?t.name:'';
+  document.getElementById('t-date').value=t?t.date:new Date().toISOString().split('T')[0];
+  document.getElementById('t-lieu').value=t&&t.lieu?t.lieu:'';
+  document.getElementById('t-rank').value=(t&&t.rank)?t.rank:'';
+  document.getElementById('t-teams').value=(t&&t.teams)?t.teams:'';
+  document.getElementById('tour-err').style.display='none';
+  goScreen('S-tour');
+}
+function saveTour(){
+  var name=document.getElementById('t-name').value.trim();
+  var err=document.getElementById('tour-err');
+  if(!name){ err.textContent='Indiquez le nom du tournoi.'; err.style.display='block'; return; }
+  var date=document.getElementById('t-date').value;
+  if(!date){ err.textContent='Sélectionnez la date du tournoi.'; err.style.display='block'; return; }
+  var lieu=document.getElementById('t-lieu').value.trim();
+  var rankRaw=document.getElementById('t-rank').value;
+  var teamsRaw=document.getElementById('t-teams').value;
+  var rank = rankRaw==='' ? null : parseInt(rankRaw);
+  var nteams = teamsRaw==='' ? null : parseInt(teamsRaw);
+  if(rank!==null && (isNaN(rank)||rank<1)){ err.textContent='Le classement doit être 1 ou plus.'; err.style.display='block'; return; }
+  if(nteams!==null && (isNaN(nteams)||nteams<2)){ err.textContent="Le nombre d'équipes doit être 2 ou plus."; err.style.display='block'; return; }
+  if(rank!==null && nteams!==null && rank>nteams){
+    err.textContent='Le classement ('+rank+') ne peut pas dépasser le nombre d\'équipes ('+nteams+').';
+    err.style.display='block'; return;
+  }
+  if(editingTourId){
+    var t=tournaments.find(function(x){return x.id===editingTourId;});
+    t.name=name; t.date=date; t.lieu=lieu; t.rank=rank; t.teams=nteams;
+    // La data del torneo guida quella dei suoi match non ancora datati.
+    matches.forEach(function(m){ if(m.tourId===t.id && !m.date) m.date=date; });
+    toast('Tournoi modifié ✓');
+  }else{
+    tournaments.push({id:Date.now(),name:name,date:date,lieu:lieu,rank:rank,teams:nteams});
+    toast('Tournoi créé ✓');
+  }
+  persist();
+  renderAllMatches(); renderTournois(); renderCalendar(); renderNextMatch(); updateCounts();
+  goScreen('S-main'); showTab('tournois');
+}
+function deleteTour(tid){
+  var t=tournaments.find(function(x){return x.id===tid;});
+  if(!t) return;
+  var n=tourMatches(tid).length;
+  var msg='Supprimer le tournoi "'+t.name+'" ?';
+  if(n) msg+='\n\n\u26A0\uFE0F Ses '+n+' match'+(n>1?'s':'')+' seront également supprimés.';
+  if(!confirm(msg)) return;
+  matches=matches.filter(function(m){ return m.tourId!==tid; });
+  tournaments=tournaments.filter(function(x){ return x.id!==tid; });
+  persist();
+  updateCounts();renderStats();renderTopScorers();renderNextMatch();renderAllMatches();renderTournois();renderCalendar();
+  toast(n?('Tournoi et '+n+' match'+(n>1?'s':'')+' supprimés ✓'):'Tournoi supprimé ✓');
+}
+
+/* ── Aggiunta di un match dentro un torneo ── */
+var pendingTourId=null;
+function addMatchToTour(tid){
+  pendingTourId=tid;
+  editId=null;
+  listOrigin='tour';        // il ritorno deve puntare alla scheda Tournois
+  openAddMatch('new');
+}
+// Composizione comune: la copio su tutti i match dello stesso torneo.
+function propagateComposition(nm){
+  if(!nm.tourId) return;
+  matches.forEach(function(m){
+    if(m.tourId!==nm.tourId || m.id===nm.id) return;
+    m.gkIds=nm.gkIds.slice(); m.defIds=nm.defIds.slice();
+    m.midIds=nm.midIds.slice(); m.attIds=nm.attIds.slice();
+  });
+}
+// Composizione gia definita per questo torneo, da precaricare.
+function tourComposition(tid){
+  var src=matches.find(function(m){
+    return m.tourId===tid && [].concat(m.gkIds||[],m.defIds||[],m.midIds||[],m.attIds||[]).length;
+  });
+  return src||null;
 }
 
 function quickDeleteMatch(id){
   if(!confirm('Supprimer définitivement ce match ?')) return;
   matches=matches.filter(m=>m.id!==id);
-  updateCounts();renderStats();renderTopScorers();renderNextMatch();renderAllMatches();renderCalendar();
+  updateCounts();renderStats();renderTopScorers();renderNextMatch();renderAllMatches();renderTournois();renderCalendar();
   if(document.getElementById('S-cat').classList.contains('on')) openCat(curCat);
   persist();
   toast('Match supprimé ✓');
@@ -975,6 +1200,7 @@ function openDetail(id){
 // l'écran catégorie, l'onglet Calendrier ou l'onglet Matchs (tous re-rendus à jour).
 function backFromDetail(){
   if(listOrigin==='cat'){ openCat(curCat); }
+  else if(listOrigin==='tour'){ backToMain('tournois'); }
   else if(listOrigin==='cal'){ renderCalendar(); backToMain('calendar'); }
   else { renderAllMatches(); backToMain('matches'); }
 }
@@ -984,7 +1210,7 @@ function askDeleteMatch(){deletingId=editId;document.getElementById('del-confirm
 function cancelDeleteMatch(){document.getElementById('del-confirm-wrap').style.display='none';}
 function deleteMatch(){
   matches=matches.filter(m=>m.id!==deletingId);
-  updateCounts();renderStats();renderTopScorers();renderNextMatch();renderAllMatches();renderCalendar();
+  updateCounts();renderStats();renderTopScorers();renderNextMatch();renderAllMatches();renderTournois();renderCalendar();
   persist();
   toast('Match supprimé ✓');
   backFromDetail();
@@ -1004,14 +1230,40 @@ function openAddMatch(mode){
   document.getElementById('f-gh').value=(m&&m.gh!==null&&m.gh!==undefined)?m.gh:'';
   document.getElementById('f-ga').value=(m&&m.ga!==null&&m.ga!==undefined)?m.ga:'';
   document.getElementById('f-lieu').value=m&&m.lieu?m.lieu:'';
+
+  // Legame con un torneo: match esistente, o nuovo match aggiunto da una scheda torneo.
+  curTourId = m ? (m.tourId||null) : pendingTourId;
+  var tnote=document.getElementById('tour-note');
+  var tour = curTourId ? tournaments.find(function(x){return x.id===curTourId;}) : null;
+  if(tour){
+    document.getElementById('f-cat-tour').style.display='';
+    document.getElementById('f-cat').value='tournois';
+    if(!m){
+      document.getElementById('f-date').value=tour.date;
+      document.getElementById('f-lieu').value=tour.lieu||'';
+    }
+    tnote.innerHTML='\u{1F3C6} Match du tournoi <b>'+tour.name+'</b>.<br>'
+      +'La composition est commune à tout le tournoi : la modifier ici la met à jour '
+      +'sur toutes les rencontres. Les buteurs restent propres à ce match.';
+    tnote.style.display='block';
+  }else{
+    // Match singolo: la categoria Tournois non deve essere selezionabile.
+    document.getElementById('f-cat-tour').style.display='none';
+    if(document.getElementById('f-cat').value==='tournois')
+      document.getElementById('f-cat').value='amicaux';
+    tnote.style.display='none';
+  }
+  pendingTourId=null;
   document.getElementById('f-com').value=m?m.com:'';
   document.getElementById('f-err').value=m?m.err:'';
   document.getElementById('f-pos').value=m?m.pos2:'';
   goalMap = {};
   (m ? (m.scorerIds || []) : []).forEach(function (id) { goalMap[id] = (goalMap[id] || 0) + 1; });
+  // Nuovo match di torneo: precarico la composizione gia usata nel torneo.
+  var comp = m || (curTourId ? tourComposition(curTourId) : null);
   selectedIds = new Set([].concat(
-    m ? (m.gkIds || []) : [], m ? (m.defIds || []) : [],
-    m ? (m.midIds || []) : [], m ? (m.attIds || []) : []
+    comp ? (comp.gkIds || []) : [], comp ? (comp.defIds || []) : [],
+    comp ? (comp.midIds || []) : [], comp ? (comp.attIds || []) : []
   ));
   renderPickAll();
   checkGoalCoherence();
@@ -1024,6 +1276,7 @@ function openAddMatch(mode){
 
 /* ═══ ELENCO UNICO : composizione a sinistra, marcatori a destra ═══ */
 var goalMap = {};        // { idGiocatore : numeroGol }
+var curTourId = null;    // torneo del match in modifica, se presente
 var selectedIds = new Set();
 
 function renderPickAll(){
@@ -1160,28 +1413,33 @@ function saveMatch(){
   var ghRaw=document.getElementById('f-gh').value, gaRaw=document.getElementById('f-ga').value;
   var gh=ghRaw===''?null:parseInt(ghRaw);
   var ga=gaRaw===''?null:parseInt(gaRaw);
-  var nm={id:editId!==null?editId:Date.now(),cat,home:document.getElementById('f-home').value||'ASRCM U13',away,gh,ga,date:document.getElementById('f-date').value,time:document.getElementById('f-time').value,lieu:document.getElementById('f-lieu').value.trim(),scorerIds:buildScorerIds(),gkIds:getPickedIds('gk'),defIds:getPickedIds('def'),midIds:getPickedIds('mid'),attIds:getPickedIds('att'),com:document.getElementById('f-com').value,err:document.getElementById('f-err').value,pos2:document.getElementById('f-pos').value};
+  var nm={id:editId!==null?editId:Date.now(),cat,home:document.getElementById('f-home').value||'ASRCM U13',away,gh,ga,date:document.getElementById('f-date').value,time:document.getElementById('f-time').value,lieu:document.getElementById('f-lieu').value.trim(),scorerIds:buildScorerIds(),gkIds:getPickedIds('gk'),defIds:getPickedIds('def'),midIds:getPickedIds('mid'),attIds:getPickedIds('att'),tourId:curTourId,com:document.getElementById('f-com').value,err:document.getElementById('f-err').value,pos2:document.getElementById('f-pos').value};
   if(!checkGoalCoherence()){
     var tot=totalGoalsAssigned(), exp=asrcmGoalsFromScore();
     if(!confirm('Les buteurs ne correspondent pas au score ('+tot+' but(s) attribué(s) pour '+exp+' au score).\n\nEnregistrer quand même ?')) return;
   }
   if(editId!==null){var idx=matches.findIndex(x=>x.id===editId);matches[idx]=nm;}
   else matches.push(nm);
+  propagateComposition(nm);
   if(document.getElementById('f-notif').checked){
     var notifTxt=isPlayed(nm)?(nm.home+' '+nm.gh+'-'+nm.ga+' '+nm.away):('Nouveau match programmé : '+nm.home+' vs '+nm.away);
     notifs.unshift({txt:notifTxt,time:'À l\'instant'});
     document.getElementById('ndot').style.display='block';
   }
-  updateCounts();renderStats();renderTopScorers();renderNextMatch();renderAllMatches();renderCalendar();renderNotifsAdmin();
+  updateCounts();renderStats();renderTopScorers();renderNextMatch();renderAllMatches();renderTournois();renderCalendar();renderNotifsAdmin();
   curCat=cat;
   persist();
   toast(editId!==null?'Match mis à jour ✓':'Match enregistré ✓');
-  openCat(cat);
+  // Match di torneo: si torna alla scheda Tournois, non alla categoria.
+  if(nm.tourId){ goScreen('S-main'); showTab('tournois'); }
+  else openCat(cat);
 }
 function backFromAdd(){
   if(editId!==null && matches.find(x=>x.id===editId)){ openDetail(editId); }
+  else if(curTourId){ goScreen('S-main'); showTab('tournois'); }
   else if(listOrigin==='cat'){ openCat(curCat); }
   else if(listOrigin==='cal'){ renderCalendar(); backToMain('calendar'); }
+  else if(listOrigin==='tour'){ backToMain('tournois'); }
   else { backToMain('matches'); }
 }
 
@@ -1319,7 +1577,7 @@ function deletePlayerConfirmed(){
   var n=playerRefCount(editingPlayerId);
   purgePlayerRefs(editingPlayerId);
   players=players.filter(p=>p.id!==editingPlayerId);
-  renderPlayersList();renderStats();renderTopScorers();renderNextMatch();renderAllMatches();renderCalendar();
+  renderPlayersList();renderStats();renderTopScorers();renderNextMatch();renderAllMatches();renderTournois();renderCalendar();
   persist();
   toast(n?('Joueur supprimé — '+n+' match'+(n>1?'s':'')+' mis à jour ✓'):'Joueur supprimé ✓');
   goScreen('S-main');showTab('players');
@@ -1336,7 +1594,7 @@ function quickDeletePlayer(id){
   if(!confirm(msg)) return;
   purgePlayerRefs(id);
   players=players.filter(x=>x.id!==id);
-  renderPlayersList();renderStats();renderTopScorers();renderNextMatch();renderAllMatches();renderCalendar();
+  renderPlayersList();renderStats();renderTopScorers();renderNextMatch();renderAllMatches();renderTournois();renderCalendar();
   persist();
   toast(n?('Joueur supprimé — '+n+' match'+(n>1?'s':'')+' mis à jour ✓'):'Joueur supprimé ✓');
 }
@@ -1359,7 +1617,23 @@ function addPlayer(){
 }
 
 /* ═══ STATS ═══ */
-function updateCounts(){['amicaux','championnat','coupe','tournois'].forEach(c=>{var el=document.getElementById('c-'+c);if(el)el.textContent=matches.filter(m=>m.cat===c).length;});}
+function updateCounts(){
+  // Le tre categorie contano i match singoli (esclusi quelli dentro un torneo).
+  ['amicaux','championnat','coupe'].forEach(function(c){
+    var el=document.getElementById('c-'+c);
+    if(el) el.textContent=matches.filter(function(m){return m.cat===c && !m.tourId;}).length;
+  });
+  // La card Tournois conta i tornei, non le loro partite.
+  var t=document.getElementById('c-tournois');
+  if(t) t.textContent=tournaments.length;
+  var sub=document.getElementById('c-tournois-sub');
+  if(sub){
+    var nm=matches.filter(function(m){return !!m.tourId;}).length;
+    sub.textContent = tournaments.length
+      ? nm+' match'+(nm>1?'s':'')+' au total'
+      : 'Aucun tournoi enregistré';
+  }
+}
 function renderStats(){
   var v=0,n=0,d=0,gf=0,ga=0;
   matches.forEach(m=>{
@@ -1410,36 +1684,93 @@ function renderTopScorers(){
     ?sorted.map((s,i)=>{var p=players.find(x=>x.id==s[0]);if(!p)return'';return'<div style="margin-bottom:'+(i<sorted.length-1?'10px':'0')+'"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px"><span style="color:#111;font-weight:'+(i===0?'600':'400')+'">'+p.name+'</span><span style="color:#999">'+s[1]+' but'+(s[1]>1?'s':'')+'</span></div><div style="height:5px;background:#eee;border-radius:999px"><div style="height:5px;border-radius:999px;background:var(--R);width:'+Math.round(s[1]/max*100)+'%"></div></div></div>';}).join('')
     :'<span style="font-size:13px;color:#bbb">Aucun but enregistré</span>';
 }
-var matchFilter='all';
+var matchFilter='all';   // all | upcoming | played | amicaux | championnat | coupe
+
+// Filtro unico: stato oppure categoria, mai entrambi insieme.
 function setMatchFilter(f){
   matchFilter=f;
-  ['all','played','upcoming'].forEach(function(k){
-    document.getElementById('mf-'+k).classList.toggle('on',k===f);
+  ['all','upcoming','played','amicaux','championnat','coupe'].forEach(function(k){
+    var b=document.getElementById('mf-'+k);
+    if(b) b.classList.toggle('on',k===f);
   });
   renderAllMatches();
 }
+
+function matchPassesFilters(m,q){
+  if(matchFilter==='played'   && !isPlayed(m)) return false;
+  if(matchFilter==='upcoming' &&  isPlayed(m)) return false;
+  if(['amicaux','championnat','coupe'].indexOf(matchFilter)>=0 && m.cat!==matchFilter) return false;
+  if(q && (m.home+' '+m.away).toLowerCase().indexOf(q)<0) return false;
+  return true;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Ordina per vicinanza a oggi: in cima cio che e piu vicino, sia nel
+   futuro sia nel passato. Il confronto e a giorni interi, cosi l'orario
+   non falsa il calcolo. Gli elementi senza data finiscono in fondo.
+   ═══════════════════════════════════════════════════════════════ */
+function sortByProximity(list){
+  var today=new Date(); today.setHours(0,0,0,0);
+  function distance(x){
+    if(!x.date) return Infinity;
+    return Math.abs(Math.round((new Date(x.date+'T00:00:00')-today)/86400000));
+  }
+  list.sort(function(a,b){
+    var da=distance(a), db=distance(b);
+    if(da!==db) return da-db;
+    // A pari distanza (uno prima e uno dopo oggi): prima quello futuro.
+    return (a.date||'')<(b.date||'') ? 1 : -1;
+  });
+  return list;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SCHEDA MATCHS — solo le partite singole, ordinate per data
+   dalla piu recente alla piu vecchia. I tornei hanno una scheda
+   dedicata e non compaiono qui.
+   ═══════════════════════════════════════════════════════════════ */
 function renderAllMatches(){
-  var q=(document.getElementById('m-search')||{}).value||'';
-  q=q.trim().toLowerCase();
-  var pool=matches.filter(function(m){
-    if(matchFilter==='played' && !isPlayed(m)) return false;
-    if(matchFilter==='upcoming' && isPlayed(m)) return false;
-    if(q && (m.home+' '+m.away).toLowerCase().indexOf(q)<0) return false;
-    return true;
+  var q=((document.getElementById('m-search')||{}).value||'').trim().toLowerCase();
+  var list=matches.filter(function(m){
+    return !m.tourId && matchPassesFilters(m,q);
   });
-  var html='';
-  ['amicaux','championnat','coupe','tournois'].forEach(function(c){
-    var ms=sortMatches(pool.filter(function(m){return m.cat===c;}));
-    if(ms.length){
-      html+='<div class="sec">'+catMeta[c].t+' <span style="color:#bbb;font-weight:400">('+ms.length+')</span></div>';
-      html+=ms.map(function(m){return matchCard(m,'tab');}).join('');
-    }
-  });
-  var empty = q||matchFilter!=='all'
+  // Ordine per vicinanza temporale: in cima cio che e piu vicino a oggi,
+  // sia nel futuro sia nel passato. Le partite senza data vanno in fondo.
+  sortByProximity(list);
+  var empty = (q||matchFilter!=='all')
     ? 'Aucun match ne correspond à cette recherche'
     : 'Aucun match enregistré';
-  document.getElementById('all-mlist').innerHTML=html||'<p style="color:#bbb;font-size:13px;text-align:center;padding:30px 0">'+empty+'</p>';
+  document.getElementById('all-mlist').innerHTML =
+    list.map(function(m){ return matchCard(m,'tab'); }).join('')
+    || '<p style="color:#bbb;font-size:13px;text-align:center;padding:30px 0">'+empty+'</p>';
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   SCHEDA TOURNOIS — un contenitore per torneo, dal piu recente.
+   ═══════════════════════════════════════════════════════════════ */
+function renderTournois(){
+  var q=((document.getElementById('t-search')||{}).value||'').trim().toLowerCase();
+  var nw=document.getElementById('tour-new-wrap');
+  if(nw) nw.style.display = role==='admin' ? 'block' : 'none';
+
+  var list=tournaments.filter(function(t){
+    if(!q) return true;
+    if(t.name.toLowerCase().indexOf(q)>=0) return true;
+    if(t.lieu && t.lieu.toLowerCase().indexOf(q)>=0) return true;
+    // cerca anche tra gli avversari delle sue partite
+    return tourMatches(t.id).some(function(m){
+      return (m.home+' '+m.away).toLowerCase().indexOf(q)>=0;
+    });
+  });
+  sortByProximity(list);
+
+  var empty = q ? 'Aucun tournoi ne correspond à cette recherche'
+                : 'Aucun tournoi enregistré';
+  document.getElementById('tour-list').innerHTML =
+    list.map(function(t){ return tourCard(t,null); }).join('')
+    || '<p style="color:#bbb;font-size:13px;text-align:center;padding:30px 0">'+empty+'</p>';
+}
+
 
 /* ═══ CALENDRIER ═══ */
 var CAL_MONTHS_FR=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
@@ -1519,7 +1850,8 @@ function buildBackup(){
       label:   TEAMS[k].label,
       players: TEAMS[k].players,
       matches: TEAMS[k].matches,
-      notifs:  TEAMS[k].notifs
+      notifs:  TEAMS[k].notifs,
+      tournaments: TEAMS[k].tournaments || []
     };
   });
   return {
@@ -1604,6 +1936,7 @@ function importBackup(input){
       TEAMS[k].players = t.players || [];
       TEAMS[k].matches = t.matches || [];
       TEAMS[k].notifs  = t.notifs  || [];
+      TEAMS[k].tournaments = t.tournaments || [];
     });
 
     bindTeamData(); updateTeamUI();

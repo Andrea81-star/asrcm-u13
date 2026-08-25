@@ -9,7 +9,7 @@
 
 // ⚠️ Cambia questo numero a ogni aggiornamento dell'app:
 // forza la cancellazione delle vecchie cache su tutti i dispositivi.
-const CACHE = 'asrcm-u13-v2';
+const CACHE = 'asrcm-u13-v4';
 
 const APP_SHELL = [
   './',

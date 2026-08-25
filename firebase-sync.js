@@ -42,7 +42,8 @@
       out.teams[k] = {
         players: window.TEAMS[k].players,
         matches: window.TEAMS[k].matches,
-        notifs:  window.TEAMS[k].notifs
+        notifs:  window.TEAMS[k].notifs,
+        tournaments: window.TEAMS[k].tournaments || []
       };
     }
     return JSON.parse(JSON.stringify(out)); // ripulisce undefined per Firestore
@@ -64,6 +65,10 @@
           if (Array.isArray(s.players)) window.TEAMS[k].players = s.players;
           if (Array.isArray(s.matches)) window.TEAMS[k].matches = s.matches;
           if (Array.isArray(s.notifs))  window.TEAMS[k].notifs  = s.notifs;
+          // I tornei sono arrivati dopo: i documenti creati prima non li hanno.
+          // In quel caso conservo quelli locali invece di cancellarli.
+          if (Array.isArray(s.tournaments)) window.TEAMS[k].tournaments = s.tournaments;
+          else if (!Array.isArray(window.TEAMS[k].tournaments)) window.TEAMS[k].tournaments = [];
         }
       }
       window.bindTeamData();
@@ -72,6 +77,8 @@
       var main = document.getElementById('S-main');
       if (main && main.classList.contains('on')) {
         try { window.initMain(); } catch (e) { console.warn('[sync] initMain:', e); }
+        try { if (window.renderTournois) window.renderTournois(); }
+        catch (e) { console.warn('[sync] renderTournois:', e); }
       }
 
       try { localStorage.setItem(window.STORAGE_KEY, JSON.stringify(data)); } catch (e) {}

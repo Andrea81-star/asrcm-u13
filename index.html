@@ -299,6 +299,10 @@ body{display:flex;justify-content:center;padding:20px 10px}
       <div class="fg"><label>Identifiant</label><input type="text" id="lu" placeholder="admin ou visiteur" value="" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" name="asrcm_user_nofill"></div>
       <div class="fg"><label>Mot de passe</label><input type="password" id="lp" placeholder="••••••••" value="" autocomplete="new-password" autocapitalize="none" autocorrect="off" spellcheck="false" name="asrcm_pwd_nofill"></div>
       <div id="lerr" class="err-box" style="display:none">Identifiant ou mot de passe incorrect.</div>
+      <label style="display:flex;align-items:center;gap:9px;margin:2px 0 13px;cursor:pointer">
+        <input type="checkbox" id="notif-opt" checked style="width:17px;height:17px;accent-color:var(--R);cursor:pointer">
+        <span style="font-size:12px;color:#666;line-height:1.4">Recevoir les notifications de mise à jour</span>
+      </label>
       <button class="btn1" id="loginBtn" onclick="doLogin()"><i class="ti ti-login"></i>Se connecter</button>
     </div>
   </div>
@@ -428,6 +432,15 @@ body{display:flex;justify-content:center;padding:20px 10px}
       <div class="sec">Notifications récentes</div>
       <div class="form-card" id="notif-list-admin"></div>
       <button class="btn2" onclick="sendManualNotif()"><i class="ti ti-send" style="font-size:14px;vertical-align:-2px"></i>Envoyer une notification</button>
+      <div class="sec">Notifications</div>
+      <div class="form-card">
+        <label style="display:flex;align-items:center;gap:9px;cursor:pointer;margin-bottom:9px">
+          <input type="checkbox" id="notif-admin" style="width:17px;height:17px;accent-color:var(--R);cursor:pointer"
+                 onchange="setNotifPref(this.checked);setTimeout(renderNotifState,900)">
+          <span style="font-size:13px;color:#111">Recevoir les notifications</span>
+        </label>
+        <div id="notif-state" style="font-size:11px;color:#999;line-height:1.5"></div>
+      </div>
       <div class="sec">Sauvegarde des données</div>
       <div class="form-card">
         <p style="font-size:12px;color:#888;line-height:1.55;margin-bottom:11px">
@@ -864,6 +877,10 @@ function doLogin(){
   try{ initMain(); }catch(e){ console.error('initMain:',e); }
   toast(role==='admin'?'Connecté — mode administrateur':'Connecté — mode visiteur');
   maybeAskRemember(u,p);
+  // Il clic su "Se connecter" e il gesto che autorizza il browser a
+  // mostrare la richiesta di permesso: va sfruttato subito.
+  var opt=document.getElementById('notif-opt');
+  if(window.setNotifPref) setNotifPref(!opt || opt.checked);
 }
 
 /* ═══ MÉMORISATION DES IDENTIFIANTS (local à l'appareil) ═══ */
@@ -875,6 +892,8 @@ function loadSavedLogin(){
 }
 // Pré-remplit le formulaire si des identifiants ont été mémorisés.
 function prefillLogin(){
+  var opt=document.getElementById('notif-opt');
+  if(opt && window.notifPrefEnabled) opt.checked=notifPrefEnabled();
   var s=loadSavedLogin(); if(!s) return;
   var lu=document.getElementById('lu'), lp=document.getElementById('lp');
   if(lu) lu.value=s.u||''; if(lp) lp.value=s.p||'';
@@ -932,7 +951,7 @@ function initMain(){
   document.getElementById('viewer-msg').style.display=a?'none':'flex';
   document.getElementById('admin-panel').style.display=a?'block':'none';
   if(calViewYear===null){var t=new Date();calViewYear=t.getFullYear();calViewMonth=t.getMonth();}
-  updateCounts();renderStats();renderTopScorers();renderNextMatch();renderAllMatches();renderTournois();renderCalendar();renderPlayersList();renderNotifsAdmin();
+  updateCounts();renderStats();renderTopScorers();renderNextMatch();renderAllMatches();renderTournois();renderCalendar();renderPlayersList();renderNotifsAdmin();renderNotifState();
 }
 
 /* ═══ CATEGORIES ═══ */
@@ -1654,18 +1673,24 @@ function renderNextMatch(){
   var box=document.getElementById('next-match');
   if(!box) return;
   var today=new Date(); today.setHours(0,0,0,0);
+  // Il conteggio si fa fra mezzanotte e mezzanotte: l'ora del match non
+  // deve entrare nel calcolo, altrimenti si sbaglia di un giorno.
+  function daysUntil(dateStr){
+    return Math.round((new Date(dateStr+'T00:00:00') - today) / 86400000);
+  }
   var up=matches.filter(function(m){
-    if(isPlayed(m)||!m.date) return false;
-    var d=new Date(m.date+'T'+(m.time||'23:59'));
-    return d>=today;
+    return !isPlayed(m) && m.date && daysUntil(m.date)>=0;
   }).sort(function(a,b){
-    return (a.date+(a.time||''))<(b.date+(b.time||''))?-1:1;
+    var ka=a.date+'T'+(a.time||'23:59'), kb=b.date+'T'+(b.time||'23:59');
+    return ka<kb?-1:ka>kb?1:0;
   });
   if(!up.length){ box.innerHTML=''; return; }
   var m=up[0];
-  var d=new Date(m.date+'T'+(m.time||'15:00'));
-  var days=Math.ceil((d-today)/86400000);
-  var count = days<=0 ? "Aujourd'hui" : days===1 ? 'Demain' : 'Dans '+days+' jours';
+  var days=daysUntil(m.date);
+  var count = days===0 ? "Aujourd'hui"
+            : days===1 ? 'Demain'
+            : days===7 ? 'Dans 1 semaine'
+            : 'Dans '+days+' jours';
   box.innerHTML='<div class="nextcard" onclick="openDetailFrom(\'tab\','+m.id+')">'
     +'<div class="nc-lbl">Prochain match</div>'
     +'<div class="nc-vs">'+m.home+' <span style="opacity:.6">vs</span> '+m.away+'</div>'
@@ -1731,8 +1756,10 @@ function sortByProximity(list){
    ═══════════════════════════════════════════════════════════════ */
 function renderAllMatches(){
   var q=((document.getElementById('m-search')||{}).value||'').trim().toLowerCase();
+  // La scheda Matchs non mostra mai i tornei: ne le partite legate a un
+  // torneo, ne quelle salvate con categoria "tournois" senza legame.
   var list=matches.filter(function(m){
-    return !m.tourId && matchPassesFilters(m,q);
+    return !m.tourId && m.cat!=='tournois' && matchPassesFilters(m,q);
   });
   // Ordine per vicinanza temporale: in cima cio che e piu vicino a oggi,
   // sia nel futuro sia nel passato. Le partite senza data vanno in fondo.
@@ -1764,10 +1791,26 @@ function renderTournois(){
   });
   sortByProximity(list);
 
+  // Partite di categoria "tournois" non collegate ad alcun torneo:
+  // vecchi dati o inserimenti manuali. Le mostro qui per non perderle.
+  var orphans=matches.filter(function(m){
+    if(m.tourId || m.cat!=='tournois') return false;
+    if(!q) return true;
+    return (m.home+' '+m.away).toLowerCase().indexOf(q)>=0;
+  });
+  sortByProximity(orphans);
+
+  var html=list.map(function(t){ return tourCard(t,null); }).join('');
+  if(orphans.length){
+    html+='<div class="sec">Matchs de tournoi isolés</div>'
+        + '<p style="font-size:11px;color:#999;line-height:1.5;margin:-4px 0 9px">'
+        + 'Ces matchs ne sont rattachés à aucun tournoi. Modifiez-les pour les y associer.</p>'
+        + orphans.map(function(m){ return matchCard(m,'tour'); }).join('');
+  }
+
   var empty = q ? 'Aucun tournoi ne correspond à cette recherche'
                 : 'Aucun tournoi enregistré';
-  document.getElementById('tour-list').innerHTML =
-    list.map(function(t){ return tourCard(t,null); }).join('')
+  document.getElementById('tour-list').innerHTML = html
     || '<p style="color:#bbb;font-size:13px;text-align:center;padding:30px 0">'+empty+'</p>';
 }
 
@@ -1825,6 +1868,18 @@ function scrollToCalDay(iso){
 }
 
 /* ═══ ADMIN UTILS ═══ */
+// Mostra lo stato reale delle notifiche su questo dispositivo.
+function renderNotifState(){
+  var box=document.getElementById('notif-state');
+  var chk=document.getElementById('notif-admin');
+  if(!box||!window.notifStatus) return;
+  var st=notifStatus();
+  if(chk) chk.checked = notifPrefEnabled() && st.code==='granted';
+  var col = st.code==='granted' ? '#2E7D32' : st.code==='denied' ? '#C62828' : '#999';
+  box.innerHTML='<span style="color:'+col+'">'+st.txt+'</span>'
+    +'<br>Un message est envoyé environ 5 minutes après une modification.';
+}
+
 function renderNotifsAdmin(){
   var el=document.getElementById('notif-list-admin');
   if(!notifs.length){el.innerHTML='<span style="font-size:13px;color:#bbb">Aucune notification envoyée</span>';return;}
@@ -1961,8 +2016,10 @@ document.getElementById('f-date').valueAsDate=new Date();
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script src="firebase-sync.js"></script>
+<script src="firebase-push.js"></script>
 
 <!-- ═══ Registrazione del service worker (modalità offline) ═══ -->
 <script>

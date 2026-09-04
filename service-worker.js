@@ -9,13 +9,14 @@
 
 // ⚠️ Cambia questo numero a ogni aggiornamento dell'app:
 // forza la cancellazione delle vecchie cache su tutti i dispositivi.
-const CACHE = 'asrcm-u13-v4';
+const CACHE = 'asrcm-u13-v6';
 
 const APP_SHELL = [
   './',
   './index.html',
   './firebase-config.js',
   './firebase-sync.js',
+  './firebase-push.js',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
@@ -94,6 +95,50 @@ self.addEventListener('fetch', (event) => {
       }))
     );
   }
+});
+
+/* ═══════════════════════════════════════════════════════════════════
+   NOTIFICHE PUSH
+   Il messaggio arriva da Firebase Cloud Messaging, inviato dalla
+   funzione programmata su Netlify. Qui viene solo mostrato.
+   ═══════════════════════════════════════════════════════════════════ */
+self.addEventListener('push', (event) => {
+  let payload = {};
+  try {
+    const raw = event.data ? event.data.json() : {};
+    payload = raw.data || raw.notification || raw;
+  } catch (e) {
+    payload = { body: event.data ? event.data.text() : '' };
+  }
+
+  const title = payload.title || 'ASRCM U13';
+  const body  = payload.body  || 'Nouvelles mises à jour disponibles';
+
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body: body,
+      icon: './icons/icon-192.png',
+      badge: './icons/icon-192.png',
+      // tag + renotify: una sola notifica alla volta, sostituita se ne arriva un'altra
+      tag: 'asrcm-maj',
+      renotify: true,
+      data: { url: './index.html' }
+    })
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const target = (event.notification.data && event.notification.data.url) || './index.html';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+      // Se l'app e gia aperta, la porto in primo piano invece di duplicarla.
+      for (const c of list) {
+        if ('focus' in c) return c.focus();
+      }
+      if (self.clients.openWindow) return self.clients.openWindow(target);
+    })
+  );
 });
 
 /* ── Aggiornamento forzato su richiesta della pagina ─────────────── */

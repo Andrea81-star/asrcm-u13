@@ -25,7 +25,8 @@ fi
 # ── Controllo che i file attesi ci siano ─────────────────────────────
 MANCANTI=""
 for f in index.html manifest.json service-worker.js firebase-config.js \
-         firebase-sync.js firestore.rules \
+         firebase-sync.js firebase-push.js firestore.rules \
+         package.json netlify.toml netlify/functions/notify.mjs \
          icons/icon-192.png icons/icon-512.png icons/maskable-192.png \
          icons/maskable-512.png icons/apple-touch-icon.png; do
   [ -f "$f" ] || MANCANTI="$MANCANTI\n   - $f"
@@ -46,7 +47,8 @@ git branch -M main
 
 echo "→ Aggiungo i file..."
 git add index.html manifest.json service-worker.js firebase-config.js \
-        firebase-sync.js firestore.rules setup.sh icons/
+        firebase-sync.js firebase-push.js firestore.rules setup.sh icons/ \
+        package.json netlify.toml netlify/
 
 if git diff --cached --quiet; then
   echo "→ Nessuna modifica da registrare: i file erano gia aggiornati."

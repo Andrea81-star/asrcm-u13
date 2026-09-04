@@ -23,6 +23,18 @@
   var db   = firebase.firestore();
   var DOC  = db.collection(CFG.collection).doc(CFG.doc);
 
+  /* ── Identificativo del dispositivo ──────────────────────────────
+     Serve per non notificare a chi ha appena salvato la propria stessa
+     modifica. Resta nel browser, non identifica la persona.          */
+  window.ASRCM_DEVICE_ID = (function () {
+    try {
+      var k = 'asrcm_device_id', v = localStorage.getItem(k);
+      if (!v) { v = 'd' + Date.now() + Math.random().toString(36).slice(2, 8);
+                localStorage.setItem(k, v); }
+      return v;
+    } catch (e) { return 'd-anon'; }
+  })();
+
   var applyingRemote = false;   // evita il loop scrittura↔lettura
   var saveTimer      = null;
   var seeded         = false;
@@ -37,7 +49,8 @@
 
   /* ── Lettura dello stato corrente dell'app ─────────────────────── */
   function snapshotLocal() {
-    var out = { pwds: window.pwds, teams: {}, updatedAt: Date.now() };
+    var out = { pwds: window.pwds, teams: {}, updatedAt: Date.now(),
+                lastEditor: window.ASRCM_DEVICE_ID };
     for (var k in window.TEAMS) {
       out.teams[k] = {
         players: window.TEAMS[k].players,

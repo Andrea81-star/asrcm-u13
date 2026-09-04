@@ -14,3 +14,14 @@ window.FIREBASE_CONFIG = {
 
 /* Percorso del documento su Firestore: collezione/documento */
 window.FIREBASE_DOC = { collection: "asrcm", doc: "u13" };
+
+/* ═══════════════════════════════════════════════════════════════════
+   CHIAVE PER LE NOTIFICHE PUSH (VAPID)
+   Console Firebase → ⚙️ Impostazioni progetto → scheda Cloud Messaging
+   → sezione "Web Push certificates" → Genera coppia di chiavi.
+   Copia qui la chiave pubblica. Non e un segreto.
+   ═══════════════════════════════════════════════════════════════════ */
+window.FIREBASE_VAPID_KEY = "BH677246NGNEASBCX9ErtoABKEn6V-95FrK20Viud0uT1Ls_xTZ-mG3i3CiRLLTJKT5OSZiJlYMRT72AFAHnDt0";
+
+/* Percorso del documento su Firestore: collezione/documento */
+window.FIREBASE_DOC = { collection: "asrcm", doc: "u13" };

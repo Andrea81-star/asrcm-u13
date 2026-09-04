@@ -1,0 +1,19 @@
+# ═══════════════════════════════════════════════════════════════════
+# ASRCM U13 — configurazione Netlify
+# Il sito e statico: nessuna compilazione, si pubblica la cartella.
+# ═══════════════════════════════════════════════════════════════════
+
+[build]
+  publish = "."
+  functions = "netlify/functions"
+  command = ""
+
+[functions]
+  node_bundler = "esbuild"
+
+# Il service worker non deve mai essere servito da cache:
+# altrimenti gli aggiornamenti dell'app non arrivano ai dispositivi.
+[[headers]]
+  for = "/service-worker.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"

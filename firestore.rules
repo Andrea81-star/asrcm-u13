@@ -3,30 +3,34 @@ rules_version = '2';
 // ═══════════════════════════════════════════════════════════════════
 // ASRCM U13 — Regole Firestore SENZA SCADENZA
 //
-// Queste regole non contengono alcuna data: non smetteranno mai di
-// funzionare da sole.
+// Nessuna data: queste regole non smetteranno mai di funzionare.
+// L'accesso richiede una sessione autenticata; l'app ne apre una
+// anonima all'avvio, quindi per l'utente non cambia nulla.
 //
-// L'accesso è consentito solo alle sessioni autenticate. L'app apre da
-// sé una sessione anonima all'avvio, quindi per l'utente non cambia
-// nulla: nessun login Firebase, nessuna registrazione.
-//
-// ⚠️ PREREQUISITO OBBLIGATORIO
-// Nella Console Firebase: Build → Authentication → Sign-in method →
-// abilitare "Anonyme". Senza questo passaggio l'app non potrà più
-// leggere né scrivere.
+// ⚠️ PREREQUISITO: Console Firebase → Build → Authentication →
+// Sign-in method → abilitare "Anonyme".
 // ═══════════════════════════════════════════════════════════════════
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    match /asrcm/{docId} {
+    // Dati dell'applicazione (effettivi, partite, tornei).
+    match /asrcm/u13 {
       allow read:  if request.auth != null;
-      // Limite di dimensione: evita che un errore riempia il database.
       allow write: if request.auth != null
                    && request.resource.data.size() < 20;
     }
 
-    // Tutto il resto è vietato.
+    // Dispositivi registrati per le notifiche.
+    // Il campo notifiedAt e scritto solo dal server, che usa le
+    // credenziali di servizio e non e soggetto a queste regole.
+    match /asrcm/push {
+      allow read:  if request.auth != null;
+      allow write: if request.auth != null
+                   && request.resource.data.size() < 5;
+    }
+
+    // Tutto il resto e vietato.
     match /{document=**} {
       allow read, write: if false;
     }

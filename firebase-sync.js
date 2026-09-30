@@ -1,9 +1,23 @@
 /* ═══════════════════════════════════════════════════════════════════
    FIREBASE SYNC — ASRCM U13
    Sostituisce la persistenza localStorage con Firestore in tempo reale.
-   - Ogni persist() dell'app scrive anche su Firestore (debounce 400 ms)
-   - onSnapshot aggiorna l'app in tempo reale su tutti i dispositivi
-   - localStorage resta come cache offline (fallback)
+
+   PROTEZIONI CONTRO LA PERDITA DI DATI (obbligatorie, non opzionali)
+   1. Nessuna scrittura prima della prima sincronizzazione.
+      All'avvio l'app si carica da localStorage, che può essere vecchio.
+      Finché il primo snapshot remoto non è arrivato e applicato, le
+      modifiche restano locali: non si pubblica mai uno stato non
+      confrontato con il cloud.
+   2. Scrittura solo dentro una transazione, con controllo di revisione.
+      Ogni documento porta un contatore "rev". Si scrive solo se il rev
+      remoto è ancora quello che abbiamo letto: se qualcun altro ha
+      scritto nel frattempo la scrittura viene rifiutata e i dati remoti
+      ricaricati, invece di sovrascriverli. Le transazioni non vengono
+      accodate offline, quindi nessuna scrittura vecchia può risvegliarsi
+      giorni dopo.
+   3. Ogni stato locale sostituito finisce nella cronologia (histPush),
+      così nulla è mai perso senza rete di sicurezza.
+
    Deve essere caricato DOPO lo script principale dell'app.
    ═══════════════════════════════════════════════════════════════════ */
 (function () {
@@ -23,9 +37,13 @@
   var db   = firebase.firestore();
   var DOC  = db.collection(CFG.collection).doc(CFG.doc);
 
+  var REV_KEY      = 'asrcm_u13_rev_v1';   // ultima revisione remota vista
+  var FIRST_WAIT   = 9000;                 // attesa max della 1a sincro (ms)
+  var RETRY_MS     = 20000;                // nuovo tentativo se la rete manca
+
   /* ── Identificativo del dispositivo ──────────────────────────────
-     Serve per non notificare a chi ha appena salvato la propria stessa
-     modifica. Resta nel browser, non identifica la persona.          */
+     Serve per tracciare chi ha scritto per ultimo. Resta nel browser,
+     non identifica la persona.                                       */
   window.ASRCM_DEVICE_ID = (function () {
     try {
       var k = 'asrcm_device_id', v = localStorage.getItem(k);
@@ -35,9 +53,24 @@
     } catch (e) { return 'd-anon'; }
   })();
 
-  var applyingRemote = false;   // evita il loop scrittura↔lettura
-  var saveTimer      = null;
-  var seeded         = false;
+  var applyingRemote  = false;  // evita il loop scrittura↔lettura
+  var saveTimer       = null;
+  var retryTimer      = null;
+  var seeded          = false;
+  var syncReady       = false;  // ⬅ PROTEZIONE 1 : true dopo il 1° snapshot
+  var pendingLocal    = false;  // modifiche locali non ancora pubblicate
+  var warnedNotReady  = false;
+  var inFlightRev     = 0;      // revisione che stiamo scrivendo in questo momento
+  var lastSeenRev     = (function () {
+    try { return Number(localStorage.getItem(REV_KEY)) || 0; } catch (e) { return 0; }
+  })();
+
+  function rememberRev(r) {
+    lastSeenRev = Number(r) || 0;
+    try { localStorage.setItem(REV_KEY, String(lastSeenRev)); } catch (e) {}
+  }
+  function say(msg) { try { if (window.toast) window.toast(msg); } catch (e) {} }
+  function keepHistory(label) { try { if (window.histPush) window.histPush(label); } catch (e) {} }
 
   /* ── Indicatore di stato (pallino in alto a destra) ────────────── */
   var dot = document.createElement('div');
@@ -48,7 +81,8 @@
   function status(color, label) { dot.style.background = color; dot.title = 'Firebase : ' + label; }
 
   /* ── Lettura dello stato corrente dell'app ─────────────────────── */
-  function snapshotLocal() {
+  // Senza il messaggio di notifica: usata anche per i confronti.
+  function buildState() {
     var out = { pwds: window.pwds, teams: {}, updatedAt: Date.now(),
                 lastEditor: window.ASRCM_DEVICE_ID };
     for (var k in window.TEAMS) {
@@ -61,10 +95,32 @@
     }
     return JSON.parse(JSON.stringify(out)); // ripulisce undefined per Firestore
   }
+  /* Messaggio scritto dall'amministratore: e l'UNICA cosa che fa partire
+     una notifica. Deve restare nel documento anche nei salvataggi
+     successivi, altrimenti una modifica fatta subito dopo lo cancella
+     prima che la funzione Netlify (che gira ogni 5 minuti) lo veda.
+     Il doppio invio e impedito dal server, che confronta notice.ts.     */
+  var carriedNotice = null;
+  function snapshotLocal() {
+    var out = buildState();
+    if (window.pendingNotice) { carriedNotice = window.pendingNotice; window.pendingNotice = null; }
+    if (carriedNotice) out.notice = carriedNotice;
+    return out;
+  }
+  function sameTeams(a, b) {
+    try { return JSON.stringify(a && a.teams) === JSON.stringify(b && b.teams); }
+    catch (e) { return false; }
+  }
 
   /* ── Applicazione dei dati remoti all'app ──────────────────────── */
   function applyRemote(data) {
     if (!data) return;
+    // Conservo l'ultimo messaggio anche quando i dati arrivano da un altro
+    // dispositivo: cosi non sparisce alla prima scrittura di questo.
+    if (data.notice && data.notice.text) carriedNotice = data.notice;
+    // PROTEZIONE 3 : conservo lo stato locale prima di sostituirlo.
+    if (!sameTeams(data, buildState())) keepHistory('avant réception cloud');
+
     applyingRemote = true;
     try {
       if (data.pwds) {
@@ -95,9 +151,75 @@
       }
 
       try { localStorage.setItem(window.STORAGE_KEY, JSON.stringify(data)); } catch (e) {}
+      rememberRev(data.rev);
     } finally {
       applyingRemote = false;
     }
+  }
+
+  /* ── Scrittura protetta ─────────────────────────────────────────── */
+  function flush() {
+    if (!syncReady) { pendingLocal = true; return; }
+    var payload = snapshotLocal();
+    var target  = lastSeenRev;              // revisione su cui ci basiamo
+    payload.rev = target + 1;
+    inFlightRev = payload.rev;
+
+    status('#E8A33D', 'enregistrement…');
+
+    db.runTransaction(function (tx) {
+      return tx.get(DOC).then(function (snap) {
+        var remoteRev = snap.exists ? (Number((snap.data() || {}).rev) || 0) : 0;
+        // PROTEZIONE 2 : qualcun altro ha scritto dopo la nostra lettura.
+        if (remoteRev !== target) {
+          var err = new Error('conflit de version');
+          err.asrcmConflict = true;
+          err.remote = snap.exists ? snap.data() : null;
+          throw err;
+        }
+        tx.set(DOC, payload);
+      });
+    })
+    .then(function () {
+      pendingLocal = false;
+      inFlightRev = 0;
+      rememberRev(payload.rev);
+      status('#2E7D32', 'synchronisé');
+    })
+    .catch(function (e) {
+      inFlightRev = 0;
+      // Il messaggio resta in carriedNotice: ripartira col prossimo tentativo.
+
+      if (e && e.asrcmConflict && !e.remote) {
+        // Il documento non esiste più: la nostra revisione non è valida.
+        rememberRev(0);
+        pendingLocal = true;
+        scheduleRetry();
+        return;
+      }
+
+      if (e && e.asrcmConflict) {
+        // Non sovrascriviamo: i dati del cloud sono più récents.
+        // Lo stato locale finisce nella cronologia (Admin → Historique).
+        console.warn('[sync] conflitto: il cloud è più recente, ricarico');
+        status('#E8A33D', 'conflit — données rechargées');
+        say('Données plus récentes reçues — ta saisie est dans Admin › Historique');
+        if (e.remote) applyRemote(e.remote);
+        pendingLocal = false;
+        return;
+      }
+
+      // Rete assente o errore momentaneo: si riprova, nulla è perso in locale.
+      console.error('[sync] write:', e);
+      status('#CC1020', 'hors ligne — non publié');
+      pendingLocal = true;
+      scheduleRetry();
+    });
+  }
+
+  function scheduleRetry() {
+    clearTimeout(retryTimer);
+    retryTimer = setTimeout(function () { if (pendingLocal) flush(); }, RETRY_MS);
   }
 
   /* ── Override di saveData : locale + Firestore ─────────────────── */
@@ -105,12 +227,19 @@
   window.saveData = function () {
     try { origSave(); } catch (e) {}
     if (applyingRemote) return;
+
+    if (!syncReady) {
+      // PROTEZIONE 1 : si salva in locale, ma non si pubblica ancora.
+      pendingLocal = true;
+      status('#E8A33D', 'attente de la 1re synchro');
+      if (!warnedNotReady) {
+        warnedNotReady = true;
+        say('Synchronisation en cours — modification enregistrée localement');
+      }
+      return;
+    }
     clearTimeout(saveTimer);
-    saveTimer = setTimeout(function () {
-      DOC.set(snapshotLocal())
-        .then(function () { status('#2E7D32', 'synchronisé'); })
-        .catch(function (e) { status('#CC1020', 'erreur écriture'); console.error('[sync] write:', e); });
-    }, 400);
+    saveTimer = setTimeout(flush, 400);
   };
 
   /* ── Autenticazione anonima ────────────────────────────────────────
@@ -118,12 +247,12 @@
      da sola una sessione anonima: l'utente non se ne accorge.
      Se in Console non e stato abilitato il metodo "Anonyme", proseguo
      comunque: con regole aperte l'app continua a funzionare.          */
+  var connected = false;
   function connect() {
     if (connected) return;
     connected = true;
     startListening();
   }
-  var connected = false;
 
   if (firebase.auth) {
     firebase.auth().onAuthStateChanged(function (user) {
@@ -141,36 +270,62 @@
     connect();
   }
 
+  /* ── Sblocco di sicurezza ──────────────────────────────────────────
+     Se il cloud non risponde (offline, regole, rete del campo), dopo
+     FIRST_WAIT si lavora comunque: le scritture partiranno appena la
+     connessione torna, sempre passando dal controllo di revisione.    */
+  setTimeout(function () {
+    if (syncReady) return;
+    syncReady = true;
+    console.warn('[sync] prima sincronizzazione non riuscita: modalità locale');
+    status('#CC1020', 'hors ligne — travail local');
+    say('Hors ligne : les modifications partiront au retour du réseau');
+    if (pendingLocal) flush();
+  }, FIRST_WAIT);
+
   /* ── Ascolto in tempo reale ────────────────────────────────────── */
   function startListening() {
-  DOC.onSnapshot(function (snap) {
-    if (snap.exists) {
-      seeded = true;
-      applyRemote(snap.data());
-      status('#2E7D32', 'synchronisé');
-      console.log('[sync] dati ricevuti da Firestore');
-    } else if (!seeded) {
-      seeded = true;
-      console.log('[sync] documento assente — invio dati iniziali');
-      DOC.set(snapshotLocal())
-        .then(function () { status('#2E7D32', 'initialisé'); })
-        .catch(function (e) { status('#CC1020', 'erreur init'); console.error('[sync] seed:', e); });
-    }
-  }, function (err) {
-    status('#CC1020', 'hors ligne');
-    console.error('[sync] onSnapshot:', err);
-    if (err && err.code === 'permission-denied') {
-      console.error('[sync] Regole Firestore: accesso rifiutato. '
-        + 'Verifica di aver abilitato "Anonyme" in Authentication e pubblicato firestore.rules.');
-    }
-  });
+    DOC.onSnapshot(function (snap) {
+      if (snap.exists) {
+        seeded = true;
+        var data = snap.data() || {};
+        var rrev = Number(data.rev) || 0;
+        // Eco della nostra stessa scrittura: niente da riapplicare.
+        var mine = data.lastEditor === window.ASRCM_DEVICE_ID
+                   && (rrev === lastSeenRev || rrev === inFlightRev);
+        if (!mine) applyRemote(data);
+        else rememberRev(data.rev);
+
+        if (!syncReady) {
+          syncReady = true;
+          console.log('[sync] prima sincronizzazione completata');
+        }
+        status('#2E7D32', 'synchronisé');
+        // Modifiche fatte prima della sincro: ora si possono pubblicare.
+        if (pendingLocal) flush();
+      } else if (!seeded) {
+        seeded = true;
+        syncReady = true;
+        rememberRev(0);   // nessun documento : si riparte dalla revisione 0
+        console.log('[sync] documento assente — invio dati iniziali');
+        flush();
+      }
+    }, function (err) {
+      status('#CC1020', 'hors ligne');
+      console.error('[sync] onSnapshot:', err);
+      if (err && err.code === 'permission-denied') {
+        console.error('[sync] Regole Firestore: accesso rifiutato. '
+          + 'Verifica di aver abilitato "Anonyme" in Authentication e pubblicato firestore.rules.');
+      }
+    });
   }
 
   /* ── Diagnostica da console ────────────────────────────────────── */
   window.fbDebug = {
     read:  function () { return DOC.get().then(function (s) { console.log(s.exists ? s.data() : 'documento inesistente'); }); },
-    write: function () { return DOC.set(snapshotLocal()).then(function () { console.log('scrittura OK'); }); },
-    local: snapshotLocal
+    write: function () { flush(); return 'scrittura protetta avviata'; },
+    local: buildState,
+    state: function () { return { syncReady: syncReady, pendingLocal: pendingLocal, lastSeenRev: lastSeenRev }; }
   };
 
   console.log('[sync] Firebase attivo →', CFG.collection + '/' + CFG.doc);

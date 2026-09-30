@@ -1,12 +1,17 @@
 /* ═══════════════════════════════════════════════════════════════════
    NOTIFICHE ASRCM U13 — funzione programmata su Netlify
-   Gira ogni 5 minuti. Se i dati sono stati modificati e sono passati
-   almeno 5 minuti dall'ultima modifica, invia una notifica a tutti i
-   dispositivi registrati, escluso quello che ha effettuato la modifica.
+   Gira ogni 5 minuti.
+
+   Invia UNA SOLA COSA: il messaggio libero che l'amministratore scrive
+   nella pagina Admin e conferma con "Envoyer le message".
+   Il salvataggio di partite, giocatori o tornei NON genera nessuna
+   notifica: i dati si aggiornano in silenzio su tutti i dispositivi.
+
+   Ogni messaggio ha un proprio orario (notice.ts). La funzione invia solo
+   i messaggi piu recenti dell'ultimo gia inviato (lastNoticeTs), quindi
+   nessun doppione anche se il documento viene riscritto piu volte.
    ═══════════════════════════════════════════════════════════════════ */
 import admin from 'firebase-admin';
-
-const DELAY_MS = 5 * 60 * 1000;   // attesa dopo l'ultima modifica
 
 function init() {
   if (admin.apps.length) return;
@@ -28,15 +33,23 @@ export default async () => {
     const [dataSnap, pushSnap] = await Promise.all([dataRef.get(), pushRef.get()]);
     if (!dataSnap.exists) return json({ sent: 0, reason: 'nessun dato' });
 
-    const data      = dataSnap.data();
-    const push      = pushSnap.exists ? pushSnap.data() : {};
-    const updatedAt = Number(data.updatedAt || 0);
-    const notified  = Number(push.notifiedAt || 0);
-    const now       = Date.now();
+    const data = dataSnap.data();
+    const push = pushSnap.exists ? pushSnap.data() : {};
+    const now  = Date.now();
 
-    if (!updatedAt)                    return json({ sent: 0, reason: 'nessuna data di modifica' });
-    if (updatedAt <= notified)         return json({ sent: 0, reason: 'gia notificato' });
-    if (now - updatedAt < DELAY_MS)    return json({ sent: 0, reason: 'attesa dei 5 minuti' });
+    // Unico motivo di invio: un messaggio scritto dall'amministratore.
+    const n        = data.notice;
+    const noticeTs = (n && n.text) ? Number(n.ts || 0) : 0;
+    const text     = noticeTs ? String(n.text).slice(0, 180).trim() : '';
+
+    // Prima esecuzione dopo l'aggiornamento: notifiedAt fa da riferimento,
+    // cosi un vecchio messaggio gia inviato non riparte.
+    const lastNoticeTs = Number(
+      push.lastNoticeTs != null ? push.lastNoticeTs : (push.notifiedAt || 0)
+    );
+
+    if (!noticeTs || !text)       return json({ sent: 0, reason: 'nessun messaggio da inviare' });
+    if (noticeTs <= lastNoticeTs) return json({ sent: 0, reason: 'messaggio gia inviato' });
 
     const devices = push.devices || {};
     // Tutti i dispositivi registrati ricevono la notifica,
@@ -46,7 +59,7 @@ export default async () => {
       .map(([id, d]) => ({ id, token: d.token }));
 
     if (!targets.length) {
-      await pushRef.set({ notifiedAt: now }, { merge: true });
+      await pushRef.set({ notifiedAt: now, lastNoticeTs: noticeTs }, { merge: true });
       return json({ sent: 0, reason: 'nessun destinatario' });
     }
 
@@ -54,7 +67,7 @@ export default async () => {
       tokens: targets.map(t => t.token),
       data: {
         title: 'ASRCM U13',
-        body:  'Nouvelles mises à jour disponibles'
+        body:  text            // sempre il testo scritto dall'amministratore
       },
       webpush: {
         headers: { Urgency: 'normal', TTL: '3600' },
@@ -73,7 +86,7 @@ export default async () => {
       }
     });
 
-    await pushRef.set({ notifiedAt: now }, { merge: true });
+    await pushRef.set({ notifiedAt: now, lastNoticeTs: noticeTs }, { merge: true });
     if (Object.keys(dead).length) await pushRef.update(dead);
 
     return json({

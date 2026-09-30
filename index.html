@@ -100,7 +100,8 @@ body{display:flex;justify-content:center;padding:20px 10px}
 .sbox{font-family:var(--scoreboard);letter-spacing:.02em;color:#fff;border-radius:8px;padding:6px 14px;font-size:20px;min-width:64px;text-align:center;white-space:nowrap}
 .win-c{background:#2E7D32}.loss-c{background:#C62828}.draw-c{background:#E65100}
 .upcoming-c{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;letter-spacing:0;background:#EEF1F8;color:#5C6BC0;font-size:11px;font-weight:600;padding:9px 10px}
-.msc{font-size:11px;color:#999;display:flex;align-items:center;gap:4px}
+.msc{font-size:11px;color:#999;display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.msc.mcards{margin-top:3px}
 
 /* Buttons */
 .btn1{background:var(--R);color:#fff;border:none;border-radius:9px;padding:12px 16px;font-size:14px;font-weight:600;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .15s}
@@ -206,9 +207,11 @@ body{display:flex;justify-content:center;padding:20px 10px}
 .warnbox b{color:#6d4c00}
 
 /* ─── Serie recente ─── */
-.formrow{display:flex;gap:4px}
+.formrow{display:flex;gap:6px}
 .formdot{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;
-         font-size:11px;font-weight:700;color:#fff}
+         font-size:11px;font-weight:700;color:#fff;position:relative}
+/* Un torneo vale un solo risultato : lo distinguo con il bordo giallo */
+.formdot.tourdot{box-shadow:0 0 0 2px #fff,0 0 0 3px #F9A825}
 
 /* ─── Elenco unico composizione + marcatori ─── */
 .pickzone{background:#f9f9f7;border-radius:10px;border:1px solid #e5e5e5;margin-bottom:12px;overflow:hidden}
@@ -225,6 +228,23 @@ body{display:flex;justify-content:center;padding:20px 10px}
 .pk-btn.plus{border-color:var(--R);color:var(--R)}
 .pk-btn.plus.maxed{opacity:.3;border-color:#ddd;color:#bbb}
 .pk-n{min-width:20px;text-align:center;font-size:14px;font-weight:700;color:#ccc}
+.pk-n.on{color:var(--R)}
+/* ─── Cartellini ─── */
+.pk-cards{display:flex;gap:4px;flex:0 0 auto;margin-left:6px}
+.card-btn{width:17px;height:23px;border-radius:3px;border:1.5px solid #ddd;background:#fff;
+  cursor:pointer;padding:0;font-family:inherit;opacity:.35;transition:opacity .12s,background .12s;
+  -webkit-tap-highlight-color:transparent;position:relative}
+.card-btn.y{border-color:#F9A825}
+.card-btn.r{border-color:#C62828}
+.card-btn.on{opacity:1}
+.card-btn.y.on{background:#F9A825}
+.card-btn.r.on{background:#C62828}
+.card-btn.y.on.dbl::after{content:"2";position:absolute;inset:0;display:flex;align-items:center;
+  justify-content:center;font-size:10px;font-weight:800;color:#5a3d00}
+/* Cartellini mostrati nel dettaglio partita e negli elenchi */
+.cardchip{display:inline-block;width:9px;height:12px;border-radius:2px;vertical-align:-1px;margin-left:4px}
+.cardchip.y{background:#F9A825}
+.cardchip.r{background:#C62828}
 .pk-n.on{color:var(--R)}
 /* La categoria puo restringersi, i pulsanti azione mai. */
 #d-catl{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -255,7 +275,15 @@ body{display:flex;justify-content:center;padding:20px 10px}
 
 /* Notifs */
 .notif-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #f0f0f0}
+.notif-item:last-of-type{border-bottom:none}
 .notif-dot{width:8px;height:8px;border-radius:50%;background:var(--R);flex-shrink:0;margin-top:5px}
+/* Messaggi dell'allenatore, visibili a tutti in home */
+.msgbox{background:#FFF8E1;border:1px solid #F5D77E;border-radius:12px;padding:13px;margin-bottom:14px}
+.msghead{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:700;color:#8a6100;
+  text-transform:uppercase;letter-spacing:.07em;margin-bottom:9px}
+.msgitem{font-size:13px;color:#4a3800;line-height:1.5;padding:7px 0;border-top:1px solid #F0E0AE}
+.msgitem:first-of-type{border-top:none;padding-top:0}
+.msgtime{font-size:11px;color:#a08850;margin-top:2px}
 
 /* Confirm */
 .confirm-box{background:#FFEBEE;border:1px solid #EF9A9A;border-radius:10px;padding:12px;margin-top:8px}
@@ -265,6 +293,26 @@ body{display:flex;justify-content:center;padding:20px 10px}
 
 /* Player form card */
 .form-card{background:#f9f9f7;border-radius:12px;padding:13px;border:1px solid #e5e5e5;margin-bottom:12px}
+.hist-row{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid #ececec}
+.hist-row:last-child{border-bottom:none}
+.hist-meta{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.hist-meta b{font-size:12.5px;color:#111;font-weight:600}
+.hist-meta span{font-size:10.5px;color:#999}
+.hist-btn{flex:0 0 auto;background:#fff;border:1px solid #ddd;border-radius:8px;padding:6px 11px;font-size:11.5px;font-weight:600;color:#111;cursor:pointer;font-family:inherit}
+.hist-btn:active{background:#f1f1f1}
+/* Tasto di cancellazione del singolo messaggio : ben visibile e facile da toccare */
+.ndel{flex:0 0 auto;width:34px;height:34px;display:flex;align-items:center;justify-content:center;
+      background:#fff;border:1px solid #e8cfcf;border-radius:9px;color:var(--R);cursor:pointer;
+      font-family:inherit;padding:0;margin-left:4px}
+.ndel i{font-size:16px}
+.ndel:active{background:#fdecec}
+/* Elenco dei messaggi inviati : chiuso di default, si apre con un click */
+.nfold{width:100%;display:flex;align-items:center;justify-content:space-between;gap:9px;
+       background:none;border:none;padding:2px 0;cursor:pointer;font-family:inherit;
+       font-size:13px;font-weight:600;color:#111;text-align:left}
+.nfold i{font-size:16px;color:#999;transition:transform .2s}
+.nfold.on i{transform:rotate(180deg)}
+.nfold-body{margin-top:8px;border-top:1px solid #ececec;padding-top:4px}
 
 /* Toast */
 .toast{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:999px;font-size:12px;font-weight:500;z-index:99;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;max-width:88%;text-align:center}
@@ -301,7 +349,7 @@ body{display:flex;justify-content:center;padding:20px 10px}
       <div id="lerr" class="err-box" style="display:none">Identifiant ou mot de passe incorrect.</div>
       <label style="display:flex;align-items:center;gap:9px;margin:2px 0 13px;cursor:pointer">
         <input type="checkbox" id="notif-opt" checked style="width:17px;height:17px;accent-color:var(--R);cursor:pointer">
-        <span style="font-size:12px;color:#666;line-height:1.4">Recevoir les notifications de mise à jour</span>
+        <span style="font-size:12px;color:#666;line-height:1.4">Recevoir les messages du staff</span>
       </label>
       <button class="btn1" id="loginBtn" onclick="doLogin()"><i class="ti ti-login"></i>Se connecter</button>
     </div>
@@ -333,6 +381,7 @@ body{display:flex;justify-content:center;padding:20px 10px}
   <!-- HOME -->
   <div id="tab-home" style="flex:1;overflow-y:auto;padding:12px 13px 16px;display:block">
     <div id="admin-banner" class="warn-banner" style="display:none"><i class="ti ti-shield-check" style="font-size:16px;color:#F9A825"></i>Mode administrateur — accès complet</div>
+    <div id="notif-home"></div>
     <div id="next-match"></div>
     <div class="sec">Catégories</div>
     <div class="catcard" onclick="openCat('amicaux')"><div class="caticon" style="background:#FEE8EA">🤝</div><div style="flex:1"><div style="font-size:14px;font-weight:600;color:#111">Amicaux</div><div style="font-size:12px;color:#999">Matchs de préparation</div></div><span class="cnt" id="c-amicaux">0</span></div>
@@ -431,13 +480,29 @@ body{display:flex;justify-content:center;padding:20px 10px}
       </div>
       <div class="sec">Notifications récentes</div>
       <div class="form-card" id="notif-list-admin"></div>
-      <button class="btn2" onclick="sendManualNotif()"><i class="ti ti-send" style="font-size:14px;vertical-align:-2px"></i>Envoyer une notification</button>
+      <div class="fg" style="margin-bottom:9px">
+        <textarea id="notif-msg" rows="3" maxlength="180"
+          placeholder="Entraînement annulé samedi, rendez-vous décalé à 14h..."
+          oninput="document.getElementById('notif-count').textContent=this.value.length"
+          style="width:100%;padding:10px 12px;border:1px solid #e0e0e0;border-radius:8px;
+                 font-size:13px;font-family:inherit;resize:vertical;outline:none"></textarea>
+        <div style="text-align:right;font-size:11px;color:#bbb;margin-top:3px">
+          <span id="notif-count">0</span>/180
+        </div>
+      </div>
+      <button class="btn2" onclick="sendManualNotif()"><i class="ti ti-send" style="font-size:14px;vertical-align:-2px"></i>Envoyer le message</button>
+      <p style="font-size:11px;color:#999;line-height:1.5;margin-top:8px">
+        Ce bouton est le <b>seul</b> qui déclenche une notification. Le message
+        s'affiche dans l'app et arrive sur les téléphones dans les 5 minutes.
+        Enregistrer un score, un joueur ou un tournoi ne notifie personne :
+        les données se mettent à jour en silence sur tous les appareils.
+      </p>
       <div class="sec">Notifications</div>
       <div class="form-card">
         <label style="display:flex;align-items:center;gap:9px;cursor:pointer;margin-bottom:9px">
           <input type="checkbox" id="notif-admin" style="width:17px;height:17px;accent-color:var(--R);cursor:pointer"
                  onchange="setNotifPref(this.checked);setTimeout(renderNotifState,900)">
-          <span style="font-size:13px;color:#111">Recevoir les notifications</span>
+          <span style="font-size:13px;color:#111">Recevoir les messages du staff</span>
         </label>
         <div id="notif-state" style="font-size:11px;color:#999;line-height:1.5"></div>
       </div>
@@ -453,6 +518,14 @@ body{display:flex;justify-content:center;padding:20px 10px}
         </button>
         <input type="file" id="backup-file" accept="application/json,.json" style="display:none" onchange="importBackup(this)">
         <div id="backup-info" style="font-size:11px;color:#999;margin-top:9px;line-height:1.5"></div>
+      </div>
+      <div class="sec">Historique des versions</div>
+      <div class="form-card">
+        <p style="font-size:12px;color:#888;line-height:1.55;margin-bottom:11px">
+          Les 10 dernières versions des données sont conservées dans cet appareil.
+          Si un résultat disparaît ou qu'une saisie est erronée, on revient en arrière ici.
+        </p>
+        <div id="hist-list"></div>
       </div>
       <div class="sec">Paramètres</div>
       <div class="form-card">
@@ -544,6 +617,10 @@ body{display:flex;justify-content:center;padding:20px 10px}
     <div style="padding:0 13px 8px">
       <div class="sec">Buteurs</div>
       <div id="d-scorers"></div>
+      <div id="d-cards-sec" style="display:none">
+        <div class="sec">Cartons</div>
+        <div id="d-cards"></div>
+      </div>
     </div>
     <div id="d-admin-sec" style="display:none;padding:0 13px 20px;border-top:1px solid #f0f0f0">
       <div class="sec">Commentaires</div>
@@ -669,7 +746,10 @@ body{display:flex;justify-content:center;padding:20px 10px}
         <div class="srow"><span style="color:#999">Buts marqués</span><span id="pe-goals" style="font-weight:700;color:var(--R)">0</span></div>
         <div class="srow"><span style="color:#999">Matchs joués</span><span id="pe-matches" style="font-weight:600">0</span></div>
         <div class="srow"><span style="color:#999">Moyenne buts/match</span><span id="pe-avg" style="font-weight:600">0.00</span></div>
+        <div class="srow"><span style="color:#999">Cartons jaunes</span><span id="pe-yel" style="font-weight:600">0</span></div>
+        <div class="srow"><span style="color:#999">Cartons rouges</span><span id="pe-red" style="font-weight:600">0</span></div>
         <div class="srow" style="align-items:center"><span style="color:#999">Série récente</span><span id="pe-form" class="formrow"></span></div>
+        <div id="pe-tour-note" style="display:none;font-size:11px;color:#aaa;line-height:1.5;padding-top:9px"></div>
       </div>
     </div>
   </div>
@@ -807,6 +887,8 @@ function saveData(){
     for(var k in TEAMS){ out.teams[k]={players:TEAMS[k].players, matches:TEAMS[k].matches, notifs:TEAMS[k].notifs, tournaments:TEAMS[k].tournaments||[]}; }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(out));
   }catch(e){ console.warn('Sauvegarde impossible :', e); }
+  // Garde une copie de l'état dans l'historique local (voir plus bas).
+  try{ if(typeof histPush === 'function') histPush('modification'); }catch(e){}
 }
 function loadData(){
   try{
@@ -823,6 +905,95 @@ function loadData(){
 }
 // Resynchronise l'équipe active dans le registre, puis sauvegarde.
 function persist(){ var t=TEAMS[currentTeam]; t.players=players; t.matches=matches; t.notifs=notifs; t.tournaments=tournaments; saveData(); }
+
+/* ═══════════════════════════════════════════════════════════════════
+   HISTORIQUE DES VERSIONS — filet de sécurité contre la perte de données
+   Chaque enregistrement conserve une copie de l'état précédent dans
+   l'appareil. Rien n'est envoyé au cloud : c'est une réserve locale,
+   consultable et restaurable depuis la page Admin.
+   ═══════════════════════════════════════════════════════════════════ */
+var HIST_KEY = 'asrcm_u13_hist_v1';
+var HIST_MAX = 10;            // nombre de versions conservées
+var HIST_MERGE_MS = 90000;    // regroupe les retouches rapprochées
+
+function histRead(){
+  try{ var r = localStorage.getItem(HIST_KEY); var a = r ? JSON.parse(r) : []; return Array.isArray(a) ? a : []; }
+  catch(e){ return []; }
+}
+function histWrite(list){
+  while(list.length){
+    try{ localStorage.setItem(HIST_KEY, JSON.stringify(list)); return true; }
+    catch(e){ list.pop(); }          // plus de place : on sacrifie les plus vieilles
+  }
+  try{ localStorage.removeItem(HIST_KEY); }catch(e){}
+  return false;
+}
+function histTeams(){
+  var out = {};
+  for(var k in TEAMS){
+    out[k] = { players:TEAMS[k].players||[], matches:TEAMS[k].matches||[],
+               notifs:TEAMS[k].notifs||[], tournaments:TEAMS[k].tournaments||[] };
+  }
+  return JSON.parse(JSON.stringify(out));
+}
+// label : d'où vient la version ("modification", "avant réception cloud"…)
+function histPush(label){
+  try{
+    var teams = histTeams(), body = JSON.stringify(teams), list = histRead();
+    if(list.length && JSON.stringify(list[0].teams) === body) return;   // rien de neuf
+    var np=0, nm=0;
+    Object.keys(teams).forEach(function(k){ np += teams[k].players.length; nm += teams[k].matches.length; });
+    var entry = { ts:Date.now(), label:label||'modification', teams:teams, np:np, nm:nm };
+    // Retouches rapprochées du même type : on remplace au lieu d'empiler.
+    if(list.length && list[0].label === entry.label && entry.ts - list[0].ts < HIST_MERGE_MS) list[0] = entry;
+    else list.unshift(entry);
+    histWrite(list.slice(0, HIST_MAX));
+  }catch(e){ console.warn('[hist] enregistrement impossible :', e); }
+}
+window.histPush = histPush;
+
+function histLabelFr(ts){
+  var d = new Date(ts), n = new Date(), p = function(x){ return x<10?'0'+x:''+x; };
+  var hm = p(d.getHours())+':'+p(d.getMinutes());
+  if(d.toDateString() === n.toDateString()) return "aujourd'hui à " + hm;
+  var y = new Date(n.getTime()-86400000);
+  if(d.toDateString() === y.toDateString()) return 'hier à ' + hm;
+  return p(d.getDate())+'/'+p(d.getMonth()+1)+' à '+hm;
+}
+
+function renderHistory(){
+  var box = document.getElementById('hist-list'); if(!box) return;
+  var list = histRead();
+  if(!list.length){
+    box.innerHTML = '<p style="font-size:12px;color:#aaa;margin:0">Aucune version enregistrée pour le moment.</p>';
+    return;
+  }
+  box.innerHTML = list.map(function(e,i){
+    return '<div class="hist-row">'
+      + '<div class="hist-meta"><b>'+histLabelFr(e.ts)+'</b>'
+      + '<span>'+e.np+' joueurs · '+e.nm+' matchs · '+e.label+'</span></div>'
+      + '<button class="hist-btn" onclick="histRestore('+i+')">Restaurer</button>'
+      + '</div>';
+  }).join('');
+}
+
+function histRestore(i){
+  var list = histRead(), e = list[i];
+  if(!e){ toast('Version introuvable'); return; }
+  if(!confirm('Restaurer la version de ' + histLabelFr(e.ts) + ' ?\n\n'
+    + e.np + ' joueurs et ' + e.nm + ' matchs vont remplacer les données actuelles '
+    + 'des deux équipes, sur tous les appareils.')) return;
+  histPush('avant restauration');
+  Object.keys(TEAMS).forEach(function(k){
+    var t = e.teams[k]; if(!t) return;
+    TEAMS[k].players = t.players || [];
+    TEAMS[k].matches = t.matches || [];
+    TEAMS[k].notifs  = t.notifs  || [];
+    TEAMS[k].tournaments = t.tournaments || [];
+  });
+  bindTeamData(); updateTeamUI(); persist(); initMain(); renderHistory();
+  toast('Version du ' + histLabelFr(e.ts) + ' restaurée ✓');
+}
 // Met à jour tous les repères visuels d'équipe (badge + sélecteur).
 function updateTeamUI(){
   var lab=TEAMS[currentTeam].label;
@@ -854,6 +1025,23 @@ function getScorerNames(ids){
   var c={};ids.forEach(id=>{c[id]=(c[id]||0)+1;});
   return Object.entries(c).map(([id,n])=>{var p=players.find(x=>x.id==id);return p?(p.name+(n>1?' ×'+n:'')):'';}).filter(Boolean).join(', ');
 }
+// Riga cartellini per la card partita: nome + pastiglia colorata.
+function getCardNames(m){
+  var y={}; (m.yellowIds||[]).forEach(function(id){ y[id]=(y[id]||0)+1; });
+  var r={}; (m.redIds||[]).forEach(function(id){ r[id]=1; });
+  var out=[];
+  Object.keys(y).forEach(function(id){
+    var p=players.find(function(x){ return x.id==id; }); if(!p) return;
+    out.push(p.name+'<span class="cardchip y"></span>'+(y[id]>1?'<span class="cardchip y"></span>':''));
+  });
+  Object.keys(r).forEach(function(id){
+    if(y[id]>1) return;              // gia mostrato come doppia ammonizione
+    var p=players.find(function(x){ return x.id==id; }); if(!p) return;
+    out.push(p.name+'<span class="cardchip r"></span>');
+  });
+  return out.length?out.join(' · '):null;
+}
+
 function posColor(pos){return{gk:'#CC1020',def:'#1B5E20',mid:'#0D47A1',att:'#B71C1C'}[pos]||'#555';}
 function posLabel(pos){return{gk:'Gardien',def:'Défenseur',mid:'Milieu',att:'Attaquant'}[pos]||pos;}
 
@@ -951,7 +1139,7 @@ function initMain(){
   document.getElementById('viewer-msg').style.display=a?'none':'flex';
   document.getElementById('admin-panel').style.display=a?'block':'none';
   if(calViewYear===null){var t=new Date();calViewYear=t.getFullYear();calViewMonth=t.getMonth();}
-  updateCounts();renderStats();renderTopScorers();renderNextMatch();renderAllMatches();renderTournois();renderCalendar();renderPlayersList();renderNotifsAdmin();renderNotifState();
+  updateCounts();renderStats();renderTopScorers();renderNextMatch();renderAllMatches();renderTournois();renderCalendar();renderPlayersList();renderNotifsAdmin();renderNotifsHome();renderNotifState();renderHistory();
 }
 
 /* ═══ CATEGORIES ═══ */
@@ -994,6 +1182,8 @@ function matchCard(m,origin){
   var trashSvg='<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>';
   var delBtn=role==='admin'?'<button class="mini-del" onclick="event.stopPropagation();quickDeleteMatch('+m.id+')" aria-label="Supprimer le match">'+trashSvg+'<span>Suppr.</span></button>':'';
   var scorersRow=played?'<div class="msc"><i class="ti ti-ball-football"></i>'+sn+'</div>':'<div class="msc">Match à venir — composition à confirmer</div>';
+  var cn=getCardNames(m);
+  if(played && cn) scorersRow+='<div class="msc mcards">'+cn+'</div>';
   return '<div class="card" data-mid="'+m.id+'" onclick="openDetailFrom(\''+origin+'\','+m.id+')">'
     +'<div class="mdate"><i class="ti ti-calendar"></i>'+fmtDate(m.date)+(m.time?' · '+m.time:'')+' · <span class="mcat">'+catMeta[m.cat].t+'</span>'+delBtn+'</div>'
     +'<div class="mteams"><span class="tname" style="text-align:left">'+m.home+'</span><span class="sbox '+cls+'">'+scoreLabel+'</span><span class="tname" style="text-align:right">'+m.away+'</span></div>'
@@ -1203,6 +1393,23 @@ function openDetail(id){
   document.getElementById('d-scorers').innerHTML=sn
     ?sn.split(',').map(s=>'<span class="ppill"><i class="ti ti-ball-football" style="color:var(--Y)"></i>'+s.trim()+'</span>').join('')
     :'<span style="color:#bbb;font-size:13px">'+(played?'Aucun buteur enregistré':'Match pas encore joué')+'</span>';
+  // Cartellini della partita
+  var cardsHtml='';
+  var yCount={}; (m.yellowIds||[]).forEach(function(id){ yCount[id]=(yCount[id]||0)+1; });
+  var reds=[...new Set(m.redIds||[])];
+  Object.keys(yCount).forEach(function(id){
+    var p=players.find(function(x){return x.id==id;}); if(!p) return;
+    cardsHtml+='<span class="ppill">'+p.name
+      +'<span class="cardchip y"></span>'+(yCount[id]>1?'<span class="cardchip y"></span>':'')+'</span>';
+  });
+  reds.forEach(function(id){
+    var p=players.find(function(x){return x.id==id;}); if(!p) return;
+    if(yCount[id]>1) return;   // gia mostrato come doppia ammonizione
+    cardsHtml+='<span class="ppill">'+p.name+'<span class="cardchip r"></span></span>';
+  });
+  document.getElementById('d-cards-sec').style.display=cardsHtml?'block':'none';
+  document.getElementById('d-cards').innerHTML=cardsHtml;
+
   var pz=(ids,el)=>{var el2=document.getElementById(el);el2.innerHTML=[...new Set(ids||[])].map(id=>{var p=players.find(x=>x.id==id);if(!p)return'';return'<span class="ppill'+(p.cap?' cap':'')+'">'+p.name+(p.cap?' ⭐':'')+'</span>';}).join('')||'<span style="color:#bbb;font-size:12px">—</span>';};
   pz(m.gkIds,'d-gk');pz(m.defIds,'d-def');pz(m.midIds,'d-mid');pz(m.attIds,'d-att');
   document.getElementById('d-com').textContent=m.com||'—';
@@ -1276,8 +1483,10 @@ function openAddMatch(mode){
   document.getElementById('f-com').value=m?m.com:'';
   document.getElementById('f-err').value=m?m.err:'';
   document.getElementById('f-pos').value=m?m.pos2:'';
-  goalMap = {};
+  goalMap = {}; yellowMap = {}; redMap = {}; manualRed = {};
   (m ? (m.scorerIds || []) : []).forEach(function (id) { goalMap[id] = (goalMap[id] || 0) + 1; });
+  (m ? (m.yellowIds || []) : []).forEach(function (id) { yellowMap[id] = (yellowMap[id] || 0) + 1; });
+  (m ? (m.redIds    || []) : []).forEach(function (id) { redMap[id] = 1; manualRed[id] = 1; });
   // Nuovo match di torneo: precarico la composizione gia usata nel torneo.
   var comp = m || (curTourId ? tourComposition(curTourId) : null);
   selectedIds = new Set([].concat(
@@ -1295,6 +1504,8 @@ function openAddMatch(mode){
 
 /* ═══ ELENCO UNICO : composizione a sinistra, marcatori a destra ═══ */
 var goalMap = {};        // { idGiocatore : numeroGol }
+var yellowMap = {};      // { idGiocatore : 0 | 1 | 2 }
+var redMap = {};         // { idGiocatore : 0 | 1 }
 var curTourId = null;    // torneo del match in modifica, se presente
 var selectedIds = new Set();
 
@@ -1312,6 +1523,7 @@ function renderPickAll(){
     html += '<div class="pk-grp">' + POS_LABEL[pos] + '</div>';
     pool.forEach(function(p){
       var g = goalMap[p.id] || 0;
+      var yc = yellowMap[p.id] || 0, rc = redMap[p.id] || 0;
       html += '<div class="pk-row">'
             +   '<label class="pk-pick">'
             +     '<input type="checkbox" data-pid="' + p.id + '" data-pos="' + pos + '"'
@@ -1323,6 +1535,12 @@ function renderPickAll(){
             +     '<button type="button" class="pk-btn" onclick="stepGoal(' + p.id + ',-1)" aria-label="Retirer un but">\u2212</button>'
             +     '<span class="pk-n' + (g ? ' on' : '') + '" id="pkn-' + p.id + '">' + g + '</span>'
             +     '<button type="button" class="pk-btn plus" onclick="stepGoal(' + p.id + ',1)" aria-label="Ajouter un but">+</button>'
+            +   '</span>'
+            +   '<span class="pk-cards">'
+            +     '<button type="button" class="card-btn y' + (yc ? ' on' : '') + (yc > 1 ? ' dbl' : '')
+            +       '" id="cy-' + p.id + '" onclick="stepCard(' + p.id + ',\'y\')" title="Carton jaune" aria-label="Carton jaune"></button>'
+            +     '<button type="button" class="card-btn r' + (rc ? ' on' : '') + '" id="cr-' + p.id
+            +       '" onclick="stepCard(' + p.id + ',\'r\')" title="Carton rouge" aria-label="Carton rouge"></button>'
             +   '</span>'
             + '</div>';
     });
@@ -1336,6 +1554,10 @@ function togglePick(pid, on){
   selectedIds.delete(pid);
   // Chi non e in composizione non puo essere marcatore.
   if(goalMap[pid]){ goalMap[pid] = 0; refreshGoalCell(pid); }
+  if(yellowMap[pid] || redMap[pid]){
+    yellowMap[pid] = 0; redMap[pid] = 0; manualRed[pid] = 0;
+    refreshCardCell(pid);
+  }
   checkGoalCoherence();
 }
 
@@ -1361,6 +1583,48 @@ function stepGoal(pid, delta){
   }
   refreshGoalCell(pid);
   checkGoalCoherence();
+}
+
+/* ═══ CARTELLINI ═══
+   Giallo: un clic = 1, due clic = 2 (che valgono un'espulsione), tre = nessuno.
+   Rosso: si attiva e si disattiva. Due gialli accendono il rosso in automatico. */
+function stepCard(pid, kind){
+  if(kind === 'y'){
+    var y = ((yellowMap[pid] || 0) + 1) % 3;
+    yellowMap[pid] = y;
+    // Due ammonizioni equivalgono a un'espulsione.
+    if(y === 2) redMap[pid] = 1;
+    else if(y === 0 && redMap[pid] === 1 && !manualRed[pid]) redMap[pid] = 0;
+  }else{
+    var r = redMap[pid] ? 0 : 1;
+    redMap[pid] = r;
+    manualRed[pid] = r ? 1 : 0;
+  }
+  // Un cartellino implica essere in campo.
+  if((yellowMap[pid] || redMap[pid]) && !selectedIds.has(pid)){
+    selectedIds.add(pid);
+    var cb = document.querySelector('#pick-all input[data-pid="' + pid + '"]');
+    if(cb) cb.checked = true;
+  }
+  refreshCardCell(pid);
+}
+var manualRed = {};   // rossi diretti, da non spegnere togliendo i gialli
+
+function refreshCardCell(pid){
+  var y = yellowMap[pid] || 0, r = redMap[pid] || 0;
+  var by = document.getElementById('cy-' + pid);
+  var br = document.getElementById('cr-' + pid);
+  if(by) by.className = 'card-btn y' + (y ? ' on' : '') + (y > 1 ? ' dbl' : '');
+  if(br) br.className = 'card-btn r' + (r ? ' on' : '');
+}
+
+function buildCardIds(map){
+  var out = [];
+  Object.keys(map).forEach(function(k){
+    var n = map[k] || 0, id = parseInt(k);
+    for(var i = 0; i < n; i++) out.push(id);
+  });
+  return out;
 }
 
 function refreshGoalCell(pid){
@@ -1432,7 +1696,7 @@ function saveMatch(){
   var ghRaw=document.getElementById('f-gh').value, gaRaw=document.getElementById('f-ga').value;
   var gh=ghRaw===''?null:parseInt(ghRaw);
   var ga=gaRaw===''?null:parseInt(gaRaw);
-  var nm={id:editId!==null?editId:Date.now(),cat,home:document.getElementById('f-home').value||'ASRCM U13',away,gh,ga,date:document.getElementById('f-date').value,time:document.getElementById('f-time').value,lieu:document.getElementById('f-lieu').value.trim(),scorerIds:buildScorerIds(),gkIds:getPickedIds('gk'),defIds:getPickedIds('def'),midIds:getPickedIds('mid'),attIds:getPickedIds('att'),tourId:curTourId,com:document.getElementById('f-com').value,err:document.getElementById('f-err').value,pos2:document.getElementById('f-pos').value};
+  var nm={id:editId!==null?editId:Date.now(),cat,home:document.getElementById('f-home').value||'ASRCM U13',away,gh,ga,date:document.getElementById('f-date').value,time:document.getElementById('f-time').value,lieu:document.getElementById('f-lieu').value.trim(),scorerIds:buildScorerIds(),yellowIds:buildCardIds(yellowMap),redIds:buildCardIds(redMap),gkIds:getPickedIds('gk'),defIds:getPickedIds('def'),midIds:getPickedIds('mid'),attIds:getPickedIds('att'),tourId:curTourId,com:document.getElementById('f-com').value,err:document.getElementById('f-err').value,pos2:document.getElementById('f-pos').value};
   if(!checkGoalCoherence()){
     var tot=totalGoalsAssigned(), exp=asrcmGoalsFromScore();
     if(!confirm('Les buteurs ne correspondent pas au score ('+tot+' but(s) attribué(s) pour '+exp+' au score).\n\nEnregistrer quand même ?')) return;
@@ -1442,7 +1706,8 @@ function saveMatch(){
   propagateComposition(nm);
   if(document.getElementById('f-notif').checked){
     var notifTxt=isPlayed(nm)?(nm.home+' '+nm.gh+'-'+nm.ga+' '+nm.away):('Nouveau match programmé : '+nm.home+' vs '+nm.away);
-    notifs.unshift({txt:notifTxt,time:'À l\'instant'});
+    notifs.unshift({txt:notifTxt,time:fmtNotifTime(new Date())});
+    if(notifs.length>30) notifs.length=30;
     document.getElementById('ndot').style.display='block';
   }
   updateCounts();renderStats();renderTopScorers();renderNextMatch();renderAllMatches();renderTournois();renderCalendar();renderNotifsAdmin();
@@ -1466,26 +1731,71 @@ function backFromAdd(){
 var POS_ORDER=['gk','def','mid','att'];
 var POS_LABEL={gk:'Gardiens',def:'Défenseurs',mid:'Milieux',att:'Attaquants'};
 function countGoals(pid){var c=0;matches.forEach(m=>{(m.scorerIds||[]).forEach(id=>{if(id==pid)c++;});});return c;}
-// Ultimi 5 match giocati dal giocatore: V (victoire), N (nul), D (défaite).
+// Il giocatore era in distinta per questa partita ?
+function inLineup(m,pid){
+  return [].concat(m.gkIds||[],m.defIds||[],m.midIds||[],m.attIds||[]).indexOf(pid)>=0;
+}
+// V (victoire), N (nul), D (défaite) per una singola partita.
+function matchOutcome(m){
+  var ih=m.home.indexOf('ASRCM')>=0, mf=ih?m.gh:m.ga, ma=ih?m.ga:m.gh;
+  return mf>ma?'V':mf<ma?'D':'N';
+}
+/* Un torneo conta come UNA partecipazione, non come tante partite.
+   Restituisce la lista delle presenze del giocatore, dalla piu recente,
+   con le partite dello stesso torneo raggruppate in una voce sola.     */
+function playerAppearances(pid,soloGiocate){
+  var out=[], tours={};
+  matches.forEach(function(m){
+    if(soloGiocate && !isPlayed(m)) return;
+    if(!inLineup(m,pid)) return;
+    if(m.tourId){
+      var t=tours[m.tourId];
+      if(!t){ t={tour:true,date:m.date||'',v:0,n:0,d:0,nb:0}; tours[m.tourId]=t; out.push(t); }
+      t.nb++;
+      if(isPlayed(m)) t[matchOutcome(m).toLowerCase()]++;
+      if((m.date||'')>t.date) t.date=m.date||'';
+    }else{
+      out.push({tour:false,date:m.date||'',res:isPlayed(m)?matchOutcome(m):null});
+    }
+  });
+  out.sort(function(a,b){ return (a.date||'')<(b.date||'')?1:-1; });
+  return out;
+}
+// Ultime 5 presenze: un torneo occupa una sola casella, con il bordo giallo.
 function recentFormHtml(pid){
   var COL={V:'#2E7D32',N:'#F9A825',D:'#C62828'};
-  var res=matches.filter(function(m){
-      return isPlayed(m) && [].concat(m.gkIds||[],m.defIds||[],m.midIds||[],m.attIds||[]).indexOf(pid)>=0;
-    })
-    .sort(function(a,b){ return (b.date||'')<(a.date||'')?-1:1; })
-    .slice(0,5)
-    .map(function(m){
-      var ih=m.home.indexOf('ASRCM')>=0, mf=ih?m.gh:m.ga, ma=ih?m.ga:m.gh;
-      return mf>ma?'V':mf<ma?'D':'N';
-    });
+  var res=playerAppearances(pid,true).slice(0,5);
   if(!res.length) return '<span style="font-size:12px;color:#bbb">Aucun match joué</span>';
   res.reverse();   // dal più vecchio al più recente, come nelle classifiche
-  return res.map(function(r){
-    return '<span class="formdot" style="background:'+COL[r]+'">'+r+'</span>';
+  return res.map(function(a){
+    if(!a.tour) return '<span class="formdot" style="background:'+COL[a.res]+'">'+a.res+'</span>';
+    // Bilancio del torneo: piu vittorie che sconfitte = V, e cosi via.
+    var r = a.v>a.d ? 'V' : a.d>a.v ? 'D' : 'N';
+    var det = 'Tournoi — '+a.nb+' match'+(a.nb>1?'s':'')+' : '+a.v+'V '+a.n+'N '+a.d+'D';
+    return '<span class="formdot tourdot" title="'+det+'" style="background:'+COL[r]+'">'+r+'</span>';
   }).join('');
 }
 
-function countMatchesPlayed(pid){return matches.filter(m=>[...(m.gkIds||[]),...(m.defIds||[]),...(m.midIds||[]),...(m.attIds||[])].includes(pid)).length;}
+// Totale cartellini di un giocatore su tutta la stagione.
+function countCards(pid,field){
+  var n=0;
+  matches.forEach(function(m){
+    (m[field]||[]).forEach(function(id){ if(id===pid) n++; });
+  });
+  return n;
+}
+
+/* Presenze del giocatore. Due regole:
+   - contano solo le partite con un risultato registrato: una convocazione
+     per una partita futura non e una partita giocata;
+   - un torneo, per quante partite contenga, vale 1.                     */
+function countMatchesPlayed(pid){ return playerAppearances(pid,true).length; }
+// Numero di partite di torneo assorbite nel conteggio, per la nota esplicativa.
+function tournamentMatchesOf(pid){
+  var n=0;
+  playerAppearances(pid,true).forEach(function(a){ if(a.tour) n+=a.nb; });
+  return n;
+}
 
 function renderPlayersList(){
   var html='';
@@ -1539,6 +1849,17 @@ function openPlayerEdit(id){
   document.getElementById('pe-matches').textContent=mp;
   document.getElementById('pe-avg').textContent=mp?(gl/mp).toFixed(2):'0.00';
   document.getElementById('pe-form').innerHTML=recentFormHtml(id);
+  // Nota: spiega perche il totale non coincide con il numero di partite.
+  var nt=document.getElementById('pe-tour-note');
+  var tours=playerAppearances(id,true).filter(function(a){return a.tour;});
+  var tm=tournamentMatchesOf(id);
+  if(tours.length){
+    nt.style.display='block';
+    nt.textContent='Dont '+tours.length+' tournoi'+(tours.length>1?'s':'')+' ('+tm+' match'
+      +(tm>1?'s':'')+') compté'+(tours.length>1?'s':'')+' comme une seule participation chacun.';
+  }else{ nt.style.display='none'; nt.textContent=''; }
+  document.getElementById('pe-yel').textContent=countCards(id,'yellowIds');
+  document.getElementById('pe-red').textContent=countCards(id,'redIds');
   document.getElementById('pe-del-confirm').style.display='none';
   // update cap star live
   document.getElementById('pe-cap').onchange=function(){
@@ -1572,13 +1893,13 @@ function savePlayerEdit(){
 // In quanti match compare questo giocatore (composizione o buteurs).
 function playerRefCount(pid){
   return matches.filter(function(m){
-    return [].concat(m.gkIds||[],m.defIds||[],m.midIds||[],m.attIds||[],m.scorerIds||[]).indexOf(pid)>=0;
+    return [].concat(m.gkIds||[],m.defIds||[],m.midIds||[],m.attIds||[],m.scorerIds||[],m.yellowIds||[],m.redIds||[]).indexOf(pid)>=0;
   }).length;
 }
 // Rimuove ogni traccia del giocatore dai match, per non lasciare id orfani.
 function purgePlayerRefs(pid){
   matches.forEach(function(m){
-    ['gkIds','defIds','midIds','attIds','scorerIds'].forEach(function(k){
+    ['gkIds','defIds','midIds','attIds','scorerIds','yellowIds','redIds'].forEach(function(k){
       if(m[k]) m[k]=m[k].filter(function(id){return id!==pid;});
     });
   });
@@ -1701,13 +2022,46 @@ function renderNextMatch(){
     +'</div>';
 }
 
+var showAllScorers=false;
+function toggleAllScorers(){ showAllScorers=!showAllScorers; renderTopScorers(); }
+
 function renderTopScorers(){
-  var c={};matches.forEach(m=>{(m.scorerIds||[]).forEach(id=>{c[id]=(c[id]||0)+1;});});
-  var sorted=Object.entries(c).sort((a,b)=>b[1]-a[1]).slice(0,5);
-  var max=sorted[0]?sorted[0][1]:1;
-  document.getElementById('top-sc').innerHTML=sorted.length
-    ?sorted.map((s,i)=>{var p=players.find(x=>x.id==s[0]);if(!p)return'';return'<div style="margin-bottom:'+(i<sorted.length-1?'10px':'0')+'"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px"><span style="color:#111;font-weight:'+(i===0?'600':'400')+'">'+p.name+'</span><span style="color:#999">'+s[1]+' but'+(s[1]>1?'s':'')+'</span></div><div style="height:5px;background:#eee;border-radius:999px"><div style="height:5px;border-radius:999px;background:var(--R);width:'+Math.round(s[1]/max*100)+'%"></div></div></div>';}).join('')
-    :'<span style="font-size:13px;color:#bbb">Aucun but enregistré</span>';
+  var c={};
+  matches.forEach(function(m){ (m.scorerIds||[]).forEach(function(id){ c[id]=(c[id]||0)+1; }); });
+  // Tengo solo i marcatori ancora presenti in rosa.
+  var all=Object.entries(c).filter(function(s){ return players.some(function(p){ return p.id==s[0]; }); })
+                 .sort(function(a,b){ return b[1]-a[1]; });
+  var list=showAllScorers?all:all.slice(0,5);
+  var max=all[0]?all[0][1]:1;
+
+  var html=list.map(function(sc,i){
+    var p=players.find(function(x){ return x.id==sc[0]; });
+    if(!p) return '';
+    var pct=Math.round(sc[1]/max*100);
+    return '<div style="margin-bottom:'+(i<list.length-1?'10px':'0')+'">'
+      + '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px">'
+      +   '<span style="color:#111;font-weight:'+(i===0?'700':'500')+'">'
+      +     (i+1)+'. '+p.name+(p.cap?' \u2B50':'')+'</span>'
+      +   '<span style="color:var(--R);font-weight:700">'+sc[1]+'</span>'
+      + '</div>'
+      + '<div style="height:5px;background:#f0f0f0;border-radius:3px;overflow:hidden">'
+      +   '<div style="height:100%;width:'+pct+'%;background:var(--R);border-radius:3px"></div>'
+      + '</div></div>';
+  }).join('');
+
+  if(all.length>5){
+    html+='<button onclick="toggleAllScorers()" style="width:100%;margin-top:12px;background:none;'
+        + 'border:1px solid #e0e0e0;border-radius:999px;padding:8px;font-size:12px;font-weight:600;'
+        + 'color:#666;cursor:pointer;font-family:inherit;display:flex;align-items:center;'
+        + 'justify-content:center;gap:5px">'
+        + (showAllScorers
+            ? '<i class="ti ti-chevron-up"></i>Voir moins'
+            : '<i class="ti ti-chevron-down"></i>Voir tous les buteurs ('+all.length+')')
+        + '</button>';
+  }
+
+  document.getElementById('top-sc').innerHTML = html
+    || '<span style="font-size:13px;color:#bbb">Aucun but enregistré</span>';
 }
 var matchFilter='all';   // all | upcoming | played | amicaux | championnat | coupe
 
@@ -1877,18 +2231,117 @@ function renderNotifState(){
   if(chk) chk.checked = notifPrefEnabled() && st.code==='granted';
   var col = st.code==='granted' ? '#2E7D32' : st.code==='denied' ? '#C62828' : '#999';
   box.innerHTML='<span style="color:'+col+'">'+st.txt+'</span>'
-    +'<br>Un message est envoyé environ 5 minutes après une modification.';
+    +'<br>Seuls les messages envoyés par le staff déclenchent une notification.';
 }
+
+// I messaggi dell'allenatore, visti da tutti in cima all'accueil.
+// Di default se ne mostra uno solo: il piu recente.
+var showAllNotifs=false;
+function toggleAllNotifs(){ showAllNotifs=!showAllNotifs; renderNotifsHome(); }
+
+function renderNotifsHome(){
+  var box=document.getElementById('notif-home');
+  if(!box) return;
+  if(!notifs.length){ box.innerHTML=''; return; }
+  var list=showAllNotifs?notifs.slice(0,15):notifs.slice(0,1);
+  var html='<div class="msgbox">'
+    +'<div class="msghead"><i class="ti ti-speakerphone" style="font-size:13px"></i>Messages de l\'équipe</div>'
+    + list.map(function(n){
+        return '<div class="msgitem">'+n.txt+'<div class="msgtime">'+n.time+'</div></div>';
+      }).join('');
+  if(notifs.length>1){
+    var reste=notifs.length-1;
+    html+='<button onclick="toggleAllNotifs()" style="width:100%;margin-top:10px;background:none;'
+        +'border:1px solid #E8D090;border-radius:999px;padding:7px;font-size:11px;font-weight:600;'
+        +'color:#8a6100;cursor:pointer;font-family:inherit">'
+        +(showAllNotifs
+            ? 'Voir moins'
+            : reste===1 ? "Voir l'autre message"
+                        : 'Voir les '+reste+' autres messages')
+        +'</button>';
+  }
+  box.innerHTML=html+'</div>';
+}
+
+// L'elenco dei messaggi gia inviati e chiuso di default: si apre con un click.
+var showAdminNotifs=false;
+function toggleAdminNotifs(){ showAdminNotifs=!showAdminNotifs; renderNotifsAdmin(); }
 
 function renderNotifsAdmin(){
   var el=document.getElementById('notif-list-admin');
-  if(!notifs.length){el.innerHTML='<span style="font-size:13px;color:#bbb">Aucune notification envoyée</span>';return;}
-  el.innerHTML=notifs.slice(0,5).map(n=>'<div class="notif-item"><div class="notif-dot"></div><div><div style="font-size:13px;color:#111;line-height:1.4">'+n.txt+'</div><div style="font-size:11px;color:#aaa;margin-top:2px">'+n.time+'</div></div></div>').join('');
+  if(!el) return;
+  if(!notifs.length){
+    showAdminNotifs=false;
+    el.innerHTML='<span style="font-size:13px;color:#bbb">Aucun message envoyé</span>';
+    return;
+  }
+
+  var tete='<button class="nfold'+(showAdminNotifs?' on':'')+'" onclick="toggleAdminNotifs()" '
+    +'aria-expanded="'+(showAdminNotifs?'true':'false')+'">'
+    +'<span>'+notifs.length+' message'+(notifs.length>1?'s':'')+' envoyé'+(notifs.length>1?'s':'')+'</span>'
+    +'<i class="ti ti-chevron-down"></i></button>';
+
+  if(!showAdminNotifs){ el.innerHTML=tete; return; }
+
+  el.innerHTML=tete+'<div class="nfold-body">'+notifs.slice(0,15).map(function(n,i){
+    return '<div class="notif-item">'
+      +'<div class="notif-dot"></div>'
+      +'<div style="flex:1;min-width:0">'
+      +  '<div style="font-size:13px;color:#111;line-height:1.4">'+n.txt+'</div>'
+      +  '<div style="font-size:11px;color:#aaa;margin-top:2px">'+n.time+'</div>'
+      +'</div>'
+      +'<button class="ndel" onclick="deleteNotif('+i+')" aria-label="Supprimer ce message" '
+      +  'title="Supprimer ce message"><i class="ti ti-trash"></i></button>'
+      +'</div>';
+  }).join('')
+  + (notifs.length>1
+      ? '<button onclick="clearAllNotifs()" style="width:100%;margin-top:11px;background:none;'
+        +'border:1px solid #e8d0d0;border-radius:999px;padding:8px;font-size:12px;font-weight:600;'
+        +'color:var(--R);cursor:pointer;font-family:inherit">Supprimer tous les messages</button>'
+      : '')
+  + '</div>';
+}
+
+// Cancellazione di un singolo messaggio dall'elenco.
+function deleteNotif(i){
+  if(i<0 || i>=notifs.length) return;
+  var apercu=(notifs[i].txt||'').slice(0,60);
+  if(!confirm('Supprimer ce message ?\n\n« '+apercu+(notifs[i].txt.length>60?'…':'')+' »\n\n'
+    +"Il disparaîtra de l'accueil sur tous les appareils.")) return;
+  notifs.splice(i,1);
+  if(!notifs.length) document.getElementById('ndot').style.display='none';
+  renderNotifsAdmin(); renderNotifsHome(); persist();
+  toast('Message supprimé ✓');
+}
+
+function clearAllNotifs(){
+  if(!confirm('Supprimer tous les messages ?\n\nIls disparaîtront de l\'accueil sur tous les appareils.')) return;
+  notifs.length=0;
+  showAllNotifs=false;
+  document.getElementById('ndot').style.display='none';
+  renderNotifsAdmin(); renderNotifsHome(); persist();
+  toast('Messages supprimés ✓');
 }
 function sendManualNotif(){
-  notifs.unshift({txt:"Notification manuelle de l'entraîneur",time:'À l\'instant'});
+  var ta=document.getElementById('notif-msg');
+  var txt=(ta.value||'').trim();
+  if(!txt){ toast('Écrivez le message à envoyer'); return; }
+
+  notifs.unshift({txt:txt,time:fmtNotifTime(new Date())});
+  if(notifs.length>30) notifs.length=30;   // conservo solo le ultime
+  // Il messaggio viaggia con i dati: la funcion Netlify lo legge e lo invia.
+  pendingNotice={text:txt,ts:Date.now()};
+  ta.value=''; document.getElementById('notif-count').textContent='0';
   document.getElementById('ndot').style.display='block';
-  renderNotifsAdmin();persist();toast('Notification envoyée ✓');
+  renderNotifsAdmin(); renderNotifsHome(); persist();
+  toast('Message envoyé ✓');
+}
+
+var pendingNotice=null;   // letto da firebase-sync al momento della scrittura
+
+function fmtNotifTime(d){
+  var pad=function(n){ return n<10?'0'+n:''+n; };
+  return pad(d.getDate())+'/'+pad(d.getMonth()+1)+' à '+pad(d.getHours())+'h'+pad(d.getMinutes());
 }
 /* ═══════════════════════════════════════════════════════════════
    SAUVEGARDE : export et import de toutes les données
